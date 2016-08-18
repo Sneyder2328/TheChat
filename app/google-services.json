@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "380993172775",
+    "firebase_url": "https://thechat-51415.firebaseio.com",
+    "project_id": "thechat-51415",
+    "storage_bucket": "thechat-51415.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:380993172775:android:fbc13cfe8c9c0fce",
+        "android_client_info": {
+          "package_name": "com.twismart.thechat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "380993172775-tkrj1u9sa406jd6d9m6kkk2kqvn07boa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.twismart.thechat",
+            "certificate_hash": "F5BA30E54AB81D7EAF8BEB7FE9F2FD21419FD327"
+          }
+        },
+        {
+          "client_id": "380993172775-00acfsjjfar4kkecpc2isrinp66jnl5o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGBqjvmAY_fABtio-foO9wWixyjhELAwE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "380993172775-00acfsjjfar4kkecpc2isrinp66jnl5o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

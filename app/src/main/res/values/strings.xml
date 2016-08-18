@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name">The Chat</string>
+
+    <string name="main.bienvenida">Connect with more people around the world</string>
+    <string name="main.signin.failed">Failed login</string>
+    <string name="main.button.signin">Sign in with Google</string>
+
+    <string name="register.input.name">Name</string>
+    <string name="register.avatar">Avatar</string>
+    <string name="register.option.female">Female</string>
+    <string name="register.option.male">Male</string>
+    <string name="register.input.birthday">Birthday</string>
+    <string name="register.input.language">Language:</string>
+    <string name="register.input.gender">Gender:</string>
+    <string name="register.button.register">Register</string>
+    <string name="register.message.under18years">You must be at least 18 years old</string>
+    <string name="register.message.selectlanguage">You must select your language</string>
+    <string name="register.message.selectgender">Please select your gender</string>
+    <string name="register.text.acceptpolicy">By register you accept our <a href="http://www.twismart.com/thechat/privacypolicy">privacy policy</a> and <a href="http://www.twismart.com/thechat/termsofuse/">terms of use</a></string>
+
+    <string-array name="register_options_avatar">
+        <item>Take photo</item>
+        <item>Choose existing photo</item>
+    </string-array>
+
+    <string-array name="register_list_languages">
+        <item>Select your language:</item>
+        <item>English</item>
+        <item>Español</item>
+        <item>Deutsch</item>
+        <item>Français</item>
+        <item>Português</item>
+        <item>Italiano</item>
+    </string-array>
+
+
+    <string-array name="mainactivity_title_fragments">
+        <item>Find</item>
+        <item>Chats</item>
+        <item>Profile</item>
+    </string-array>
+
+
+    <string name="action_settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
