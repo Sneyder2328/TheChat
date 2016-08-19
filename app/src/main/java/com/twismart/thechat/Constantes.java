@@ -15,6 +15,6 @@ public class Constantes {
     }
 
     public enum Status{
-        SEARCHING, ONLINE, OFFLINE
+        SEARCHING, FOUND, ONLINE, OFFLINE
     }
 }

@@ -1,5 +1,6 @@
 package com.twismart.thechat;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.mysampleapp.demo.nosql.UserDO;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -34,7 +36,7 @@ public class LoginActivity extends AppCompatActivity {
 
         preferences = getSharedPreferences(Constantes.MY_PREFERENCES, MODE_PRIVATE);
         if(preferences.getBoolean(Constantes.LOGGED, false)){
-            openChat();
+            openMainActivity();
         }
         else{
             //init process sign in with Google
@@ -47,8 +49,6 @@ public class LoginActivity extends AppCompatActivity {
                     .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                     .build();
         }
-
-        startActivity(new Intent(this, MainActivity.class));
     }
 
     public void signIn(View v){
@@ -75,7 +75,7 @@ public class LoginActivity extends AppCompatActivity {
         Log.d("handleSignInResult", "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
-            GoogleSignInAccount acct = result.getSignInAccount();
+            final GoogleSignInAccount acct = result.getSignInAccount();
 
             try {
                 Log.d("getEmail", acct.getEmail());
@@ -83,47 +83,65 @@ public class LoginActivity extends AppCompatActivity {
                 Log.d("getId", acct.getId());
                 Log.d("getPhotoUrl", ""+acct.getPhotoUrl());
 
-                openRegister(Constantes.SignInMode.GOOGLE.name(), acct.getId(), acct.getEmail(), acct.getDisplayName(), acct.getPhotoUrl()+"");
+                final ProgressDialog mProgressDialog = new ProgressDialog(this);
+                mProgressDialog.setCancelable(false);
+                mProgressDialog.setMessage(getString(R.string.login_message_progress_load));
+                mProgressDialog.show();
+
+                NetworkInteractor networkInteractor = new NetworkInteractor(this);
+                networkInteractor.existUserById(acct.getId(), new NetworkInteractor.IExistUserListener() {
+                    @Override
+                    public void onYesExist(UserDO user) {
+                        saveUserInLocal(user);
+                        openMainActivity();
+                        mProgressDialog.cancel();
+                    }
+                    @Override
+                    public void onNotExist() {
+                        openRegister(Constantes.SignInMode.GOOGLE.name(), acct.getId(), acct.getEmail(), acct.getDisplayName(), acct.getPhotoUrl()+"");
+                        mProgressDialog.cancel();
+                    }
+                });
+                Auth.GoogleSignInApi.signOut(mGoogleApiClient);
             }
             catch (Exception e){
                 Log.d("Error", "catch en log de datos " +e.getMessage());
             }
         } else {
-            Toast.makeText(this, R.string.main_signin_failed, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.login_signin_failed, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void saveUserInLocal(UserDO user){
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(Constantes.ID, user.getUserId());
+        editor.putString(Constantes.NAME, user.getName());
+        editor.putString(Constantes.EMAIL, user.getEmail());
+        editor.putString(Constantes.PHOTO_URL, user.getPhotoUrl());
+        editor.putString(Constantes.GENDER, user.getGender());
+        editor.putString(Constantes.LANGUAGE, user.getLanguage());
+        editor.putBoolean(Constantes.IS_ADULT, true);
+        double birthday = user.getBirthday();
+        editor.putLong(Constantes.BIRTHDAY, (long) birthday);
+        editor.apply();
+    }
+
+    private void openMainActivity(){
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
     private void openRegister(String signInMode, String id, String email, String name, String photoUrl){
-        Bundle data = new Bundle();
-        data.putString(Constantes.SIGN_IN_MODE, signInMode);
-        data.putString(Constantes.ID, id);
-        data.putString(Constantes.EMAIL, email);
-        data.putString(Constantes.NAME, name);
-        data.putString(Constantes.PHOTO_URL, photoUrl);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
+        editor.putString(Constantes.SIGN_IN_MODE, signInMode);//aun no la uso en dynamo// prox la integrare
+        editor.putString(Constantes.ID, id);
+        editor.putString(Constantes.NAME, name);
+        editor.putString(Constantes.EMAIL, email);
+        editor.putString(Constantes.PHOTO_URL, photoUrl);
+        editor.apply();
 
-        Intent intent = new Intent(this, Register.class);
-        intent.putExtras(data);
-        startActivity(intent);
-    }
-
-    private void openChat(){
-       // startActivity(new Intent(this, Chat.class));
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        startActivity(new Intent(this, Register.class));
+        finish();
     }
 }

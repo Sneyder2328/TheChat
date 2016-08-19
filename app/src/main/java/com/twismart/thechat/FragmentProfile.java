@@ -1,70 +1,278 @@
 package com.twismart.thechat;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link FragmentProfile.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link FragmentProfile#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class FragmentProfile extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+import de.hdodenhof.circleimageview.CircleImageView;
+
+public class FragmentProfile extends Fragment implements View.OnClickListener {
 
     private OnFragmentInteractionListener mListener;
+    public static final String TAG = "FragmentProfile";
+    private static final int PICK_PHOTO = 100, TAKE_PHOTO = 101;
+
+    public static TextView birthday;
+
+    private EditText inputName;
+    private RadioButton optionFemale, optionMale;
+    private CircleImageView imgAvatar;
+    private Spinner spinnerLanguages;
+
+    private String[] listLanguages;
+
+    NetworkInteractor networkInteractor;
 
     public FragmentProfile() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FragmentProfile.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FragmentProfile newInstance(String param1, String param2) {
-        FragmentProfile fragment = new FragmentProfile();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_profile, container, false);
+
+        if(getActivity() instanceof Register){
+            v.findViewById(R.id.linearChanges).setVisibility(View.INVISIBLE);
+        }
+        else{
+            v.findViewById(R.id.buttonSave).setOnClickListener(this);
+            v.findViewById(R.id.buttonCancel).setOnClickListener(this);
+        }
+
+        inputName = (EditText) v.findViewById(R.id.inputName);
+
+        //
+        imgAvatar = (CircleImageView) v.findViewById(R.id.imgAvatar);
+        imgAvatar.setOnClickListener(this);
+
+        //
+        birthday = (TextView) v.findViewById(R.id.birthday);
+        birthday.setOnClickListener(this);
+
+        //
+        optionFemale = (RadioButton) v.findViewById(R.id.optionFemale);
+        optionMale = (RadioButton) v.findViewById(R.id.optionMale);
+
+        //
+        listLanguages = getResources().getStringArray(R.array.register_list_languages);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.register_list_languages, android.R.layout.simple_spinner_dropdown_item);
+
+        spinnerLanguages = (Spinner) v.findViewById(R.id.spinnerLanguages);
+        spinnerLanguages.setAdapter(adapter);
+
+        loadDataFromProfileLocal();
+
+        networkInteractor = new NetworkInteractor(getActivity());
+
+        return v;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.birthday:
+                setBirthday();
+                break;
+            case R.id.imgAvatar:
+                setAvatar();
+                break;
+            case R.id.buttonSave:
+                register();
+                break;
+            case R.id.buttonCancel:
+                loadDataFromProfileLocal();
+                break;
         }
     }
 
+    private void loadDataFromProfileLocal(){
+        //load user name
+        inputName.setText(LoginActivity.preferences.getString(Constantes.NAME, ""));
+
+        //load avatar
+        Glide.with(this).load(LoginActivity.preferences.getString(Constantes.PHOTO_URL, "")).into(imgAvatar);
+
+        //load gender selected
+        if(LoginActivity.preferences.getString(Constantes.GENDER, "").equals(Constantes.GENDER_MALE)){
+            optionMale.setChecked(true);
+        }
+        else if(LoginActivity.preferences.getString(Constantes.GENDER, "").equals(Constantes.GENDER_FEMALE)){
+            optionFemale.setChecked(true);
+        }
+
+        //load birthday
+        if(LoginActivity.preferences.getLong(Constantes.BIRTHDAY, 0) != 0){
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(LoginActivity.preferences.getLong(Constantes.BIRTHDAY, 0));
+
+            StringBuilder stringDate = new StringBuilder("Birthday: ").append(calendar.get(Calendar.DAY_OF_MONTH)).append("/").append(calendar.get(Calendar.MONTH)+1).append("/").append(calendar.get(Calendar.YEAR));
+            birthday.setText(stringDate);
+        }
+    }
+
+    private void setBirthday(){
+        DialogDate dialogDate = new DialogDate();
+        dialogDate.show(getActivity().getFragmentManager(), "tag");
+    }
+
+    private void setAvatar(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setItems(R.array.register_options_avatar, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if(i==0){
+                    Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    if (cameraIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                        startActivityForResult(cameraIntent, TAKE_PHOTO);
+                    }
+                }
+                else{
+                    Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+                    photoPickerIntent.setType("image/*");
+                    startActivityForResult(photoPickerIntent, PICK_PHOTO);
+                }
+            }
+        });
+        builder.create();
+        builder.show();
+    }
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case PICK_PHOTO:
+                if (resultCode == Activity.RESULT_OK) {
+                    Log.d(TAG, "Picked photo.");
+                    Uri selectedImage = data.getData();
+                    showNewAvatar(selectedImage);
+                }
+                break;
+            case TAKE_PHOTO:
+                if (resultCode == Activity.RESULT_OK) {
+                    Log.d(TAG, "Take photo.");
+                    Bundle extras = data.getExtras();
+                    Bitmap imageBitmap = (Bitmap) extras.get("data");
+                    showNewAvatar(saveToInternalStorage(imageBitmap));
+                }
+        }
+    }
+
+    private void showNewAvatar(Object img){
+        try{
+            Glide.with(this).load(img.toString()).into(imgAvatar);
+            SharedPreferences.Editor editor = LoginActivity.preferences.edit();
+            editor.putString(Constantes.PHOTO_URL, img.toString());
+            editor.apply();
+        }
+        catch (Exception e) {
+            Log.d(TAG, "Error en showNewAvatar: " + e.getMessage());
+        }
+    }
+
+    private String saveToInternalStorage(Bitmap bitmapImage){
+        ContextWrapper cw = new ContextWrapper(getContext());
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        // Create imageDir
+        File mypath = new File(directory, "TheChat" + (System.currentTimeMillis()/1000) + "Avatar.jpg");
+
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(mypath);
+            // Use the compress method on the BitMap object to write image to the OutputStream
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                if (fileOutputStream != null) {
+                    fileOutputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return mypath.getAbsolutePath();
+    }
+
+
+    public void register(){
+        if(optionFemale.isChecked() || optionMale.isChecked()) {//if gender is selected
+            if (LoginActivity.preferences.getBoolean(Constantes.IS_ADULT, false)) {//if is over 18 age years
+                if(spinnerLanguages.getSelectedItemPosition() != 0){//if lenguage is selected
+                    saveProfileInLocal();
+                    networkInteractor.writeProfile(getActivity() instanceof Register, new NetworkInteractor.IWriteProfileListener() {
+                        @Override
+                        public void onSucces() {
+                            if(getActivity() instanceof MainActivity){
+                                Toast.makeText(getContext(), R.string.register_message_profile_dataupdated, Toast.LENGTH_LONG).show();
+                            }
+                            else{
+                                startActivity(new Intent(getActivity(), MainActivity.class));
+                                getActivity().finish();
+                            }
+                        }
+                        @Override
+                        public void onFailure(String error) {
+                            Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+                else {
+                    Toast.makeText(getContext(), R.string.register_message_selectlanguage, Toast.LENGTH_LONG).show();
+                }
+            } else {
+                Toast.makeText(getContext(), R.string.register_message_under18years, Toast.LENGTH_LONG).show();
+                birthday.setError("");
+            }
+        } else {
+            Toast.makeText(getContext(), R.string.register_message_selectgender, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void saveProfileInLocal(){
+        SharedPreferences.Editor editor = LoginActivity.preferences.edit();
+        editor.putString(Constantes.NAME, inputName.getText().toString());
+        editor.putString(Constantes.LANGUAGE, listLanguages[spinnerLanguages.getSelectedItemPosition()]);
+
+        if(optionFemale.isChecked()){
+            editor.putString(Constantes.GENDER, Constantes.GENDER_FEMALE);
+        }
+        else{
+            editor.putString(Constantes.GENDER, Constantes.GENDER_MALE);
+        }
+        editor.apply();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -90,16 +298,6 @@ public class FragmentProfile extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);

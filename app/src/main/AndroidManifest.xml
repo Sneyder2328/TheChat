@@ -25,7 +25,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
 
         <!-- This meta-data tag is required to use Google Play Services. -->
         <meta-data
@@ -62,6 +62,9 @@
             android:screenOrientation="sensorPortrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
+        <activity
+            android:name=".ChatActivity"
+            android:label="@string/activity.chat.title"/>
     </application>
 
 </manifest>

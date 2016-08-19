@@ -1,9 +1,30 @@
 <resources>
     <string name="app_name">The Chat</string>
 
-    <string name="main.bienvenida">Connect with more people around the world</string>
-    <string name="main.signin.failed">Failed login</string>
-    <string name="main.button.signin">Sign in with Google</string>
+
+    <string name="activity.chat.title">Search Chat</string>
+
+
+    <string name="login.bienvenida">Connect with more people around the world</string>
+    <string name="login.signin.failed">Failed login</string>
+    <string name="login.button.signin">Sign in with Google</string>
+    <string name="login.message.progress.load">Loading data...</string>
+
+
+
+
+
+    <string name="main.menu.logout">Log out</string>
+
+    <string-array name="mainactivity_title_fragments">
+        <item>Find</item>
+        <item>Chats</item>
+        <item>Profile</item>
+    </string-array>
+
+
+
+
 
     <string name="register.input.name">Name</string>
     <string name="register.avatar">Avatar</string>
@@ -13,10 +34,13 @@
     <string name="register.input.language">Language:</string>
     <string name="register.input.gender">Gender:</string>
     <string name="register.button.register">Register</string>
+    <string name="register.button.savechanges">Save changes</string>
+    <string name="register.button.cancelchanges">Cancel</string>
     <string name="register.message.under18years">You must be at least 18 years old</string>
     <string name="register.message.selectlanguage">You must select your language</string>
     <string name="register.message.selectgender">Please select your gender</string>
     <string name="register.text.acceptpolicy">By register you accept our <a href="http://www.twismart.com/thechat/privacypolicy">privacy policy</a> and <a href="http://www.twismart.com/thechat/termsofuse/">terms of use</a></string>
+    <string name="register.message.profile.dataupdated">Your profile data have been updated correctly</string>
 
     <string-array name="register_options_avatar">
         <item>Take photo</item>
@@ -34,14 +58,46 @@
     </string-array>
 
 
-    <string-array name="mainactivity_title_fragments">
-        <item>Find</item>
-        <item>Chats</item>
-        <item>Profile</item>
+
+
+
+    <string name="find.text.interestin">Interest in:</string>
+    <string name="find.check.searchinmylanguage">Search in my language</string>
+    <string name="find.button.startchat">Start Chat</string>
+    <string name="find.text.ageby">Age min:</string>
+    <string name="find.text.ageto">Age max:</string>
+
+    <string-array name="find_options_distance">
+        <item>Distance: up to 10 km</item>
+        <item>Distance: up to 50 km</item>
+        <item>Distance: up to 100 km</item>
+        <item>Distance: up to 250 km</item>
+        <item>Distance: up to 500 km</item>
+        <item>Distance: up to 1000 km</item>
+        <item>Distance: up to 2500 km</item>
+        <item>Distance: doesn\'t matter</item>
     </string-array>
 
+    <string-array name="find_options_age">
+        <item>18</item>
+        <item>22</item>
+        <item>24</item>
+        <item>26</item>
+        <item>28</item>
+        <item>30</item>
+        <item>32</item>
+        <item>34</item>
+        <item>36</item>
+        <item>38</item>
+        <item>40</item>
+        <item>42</item>
+        <item>44</item>
+        <item>46</item>
+        <item>48</item>
+        <item>50</item>
+        <item>any</item>
+    </string-array>
 
-    <string name="action_settings">Settings</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

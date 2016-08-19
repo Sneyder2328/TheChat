@@ -39,7 +39,7 @@ public class DialogDate extends DialogFragment implements DatePickerDialog.OnDat
         Calendar dateNow = Calendar.getInstance();
         if(dateNow.after(birthDateMore18)){//is over 18 years
             editor.putBoolean(Constantes.IS_ADULT, true);
-            Register.birthday.setError(null);
+            FragmentProfile.birthday.setError(null);
         }
         else{
             editor.putBoolean(Constantes.IS_ADULT, false);
@@ -47,7 +47,7 @@ public class DialogDate extends DialogFragment implements DatePickerDialog.OnDat
         editor.apply();
 
         StringBuilder date = new StringBuilder("Birthday: ").append(day).append("/").append(month+1).append("/").append(year);
-        Register.birthday.setText(date);
+        FragmentProfile.birthday.setText(date);
 
         cumple(18, 59, birthDate.getTime());
     }

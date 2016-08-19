@@ -1,13 +1,97 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.twismart.thechat.FragmentFind">
+    android:orientation="vertical">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center_horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/find.text.interestin"
+            android:textColor="#000"
+            android:textSize="20sp" />
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/register.option.female"
+            android:textSize="20sp"
+            android:id="@+id/checkFemale" />
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/register.option.male"
+            android:layout_marginLeft="20dp"
+            android:textSize="20sp"
+            android:id="@+id/checkMale" />
+
+    </LinearLayout>
+
+    <Spinner
+        android:id="@+id/spinnerDistance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"/>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/find.text.ageby"
+            android:textSize="18sp"
+            android:layout_marginRight="6dp"
+            android:textColor="#000"/>
+
+        <Spinner
+            android:id="@+id/spinnerAgeMin"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="6dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/find.text.ageto"
+            android:layout_marginRight="6dp"
+            android:textSize="18sp"
+            android:textColor="#000" />
+
+        <Spinner
+            android:id="@+id/spinnerAgeMax"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/find.check.searchinmylanguage"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:checked="true"
+        android:textSize="20sp"
+        android:id="@+id/checkInMyLanguage" />
+
+    <Button
+        android:id="@+id/btnStart"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/find.button.startchat"/>
 
-</FrameLayout>
+</LinearLayout>

@@ -37,7 +37,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/main.bienvenida"
+            android:text="@string/login.bienvenida"
             android:layout_gravity="center"
             android:gravity="center"
             android:layout_marginTop="20dp"
@@ -51,7 +51,7 @@
             android:layout_marginRight="32dp"
             android:layout_marginTop="50dp"
             android:layout_gravity="center"
-            android:text="@string/main.button.signin"
+            android:text="@string/login.button.signin"
             android:onClick="signIn"/>
 
     </LinearLayout>
