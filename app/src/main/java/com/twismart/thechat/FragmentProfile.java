@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Date;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -49,6 +48,7 @@ public class FragmentProfile extends Fragment implements View.OnClickListener {
     private String[] listLanguages;
 
     NetworkInteractor networkInteractor;
+    private PreferencesProfile preferencesProfile;
 
     public FragmentProfile() {
         // Required empty public constructor
@@ -87,6 +87,7 @@ public class FragmentProfile extends Fragment implements View.OnClickListener {
         spinnerLanguages = (Spinner) v.findViewById(R.id.spinnerLanguages);
         spinnerLanguages.setAdapter(adapter);
 
+        preferencesProfile = new PreferencesProfile(getContext());
         loadDataFromProfileLocal();
 
         networkInteractor = new NetworkInteractor(getActivity());
@@ -114,23 +115,23 @@ public class FragmentProfile extends Fragment implements View.OnClickListener {
 
     private void loadDataFromProfileLocal(){
         //load user name
-        inputName.setText(LoginActivity.preferences.getString(Constantes.NAME, ""));
+        inputName.setText(preferencesProfile.preferences.getString(Constantes.NAME, ""));
 
         //load avatar
-        Glide.with(this).load(LoginActivity.preferences.getString(Constantes.PHOTO_URL, "")).into(imgAvatar);
+        Glide.with(this).load(preferencesProfile.preferences.getString(Constantes.PHOTO_URL, "")).into(imgAvatar);
 
         //load gender selected
-        if(LoginActivity.preferences.getString(Constantes.GENDER, "").equals(Constantes.GENDER_MALE)){
+        if(preferencesProfile.preferences.getString(Constantes.GENDER, "").equals(Constantes.GENDER_MALE)){
             optionMale.setChecked(true);
         }
-        else if(LoginActivity.preferences.getString(Constantes.GENDER, "").equals(Constantes.GENDER_FEMALE)){
+        else if(preferencesProfile.preferences.getString(Constantes.GENDER, "").equals(Constantes.GENDER_FEMALE)){
             optionFemale.setChecked(true);
         }
 
         //load birthday
-        if(LoginActivity.preferences.getLong(Constantes.BIRTHDAY, 0) != 0){
+        if(preferencesProfile.preferences.getLong(Constantes.BIRTHDAY, 0) != 0){
             Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(LoginActivity.preferences.getLong(Constantes.BIRTHDAY, 0));
+            calendar.setTimeInMillis(preferencesProfile.preferences.getLong(Constantes.BIRTHDAY, 0));
 
             StringBuilder stringDate = new StringBuilder("Birthday: ").append(calendar.get(Calendar.DAY_OF_MONTH)).append("/").append(calendar.get(Calendar.MONTH)+1).append("/").append(calendar.get(Calendar.YEAR));
             birthday.setText(stringDate);
@@ -189,7 +190,7 @@ public class FragmentProfile extends Fragment implements View.OnClickListener {
     private void showNewAvatar(Object img){
         try{
             Glide.with(this).load(img.toString()).into(imgAvatar);
-            SharedPreferences.Editor editor = LoginActivity.preferences.edit();
+            SharedPreferences.Editor editor = preferencesProfile.preferences.edit();
             editor.putString(Constantes.PHOTO_URL, img.toString());
             editor.apply();
         }
@@ -229,7 +230,7 @@ public class FragmentProfile extends Fragment implements View.OnClickListener {
 
     public void register(){
         if(optionFemale.isChecked() || optionMale.isChecked()) {//if gender is selected
-            if (LoginActivity.preferences.getBoolean(Constantes.IS_ADULT, false)) {//if is over 18 age years
+            if (preferencesProfile.preferences.getBoolean(Constantes.IS_ADULT, false)) {//if is over 18 age years
                 if(spinnerLanguages.getSelectedItemPosition() != 0){//if lenguage is selected
                     saveProfileInLocal();
                     networkInteractor.writeProfile(getActivity() instanceof Register, new NetworkInteractor.IWriteProfileListener() {
@@ -262,8 +263,13 @@ public class FragmentProfile extends Fragment implements View.OnClickListener {
     }
 
     private void saveProfileInLocal(){
-        SharedPreferences.Editor editor = LoginActivity.preferences.edit();
-        editor.putString(Constantes.NAME, inputName.getText().toString());
+        SharedPreferences.Editor editor = preferencesProfile.preferences.edit();
+        if(inputName.getText().toString().equals("")){
+            editor.putString(Constantes.NAME, getString(R.string.register_text_anonymous));
+        }
+        else{
+            editor.putString(Constantes.NAME, inputName.getText().toString());
+        }
         editor.putString(Constantes.LANGUAGE, listLanguages[spinnerLanguages.getSelectedItemPosition()]);
 
         if(optionFemale.isChecked()){

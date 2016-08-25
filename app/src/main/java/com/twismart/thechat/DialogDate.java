@@ -33,7 +33,9 @@ public class DialogDate extends DialogFragment implements DatePickerDialog.OnDat
         birthDate.set(Calendar.MONTH, month);
         birthDate.set(Calendar.DAY_OF_MONTH, day);
 
-        SharedPreferences.Editor editor = LoginActivity.preferences.edit();
+        PreferencesProfile preferencesProfile = new PreferencesProfile(getActivity());
+
+        SharedPreferences.Editor editor  = preferencesProfile.preferences.edit();
         editor.putLong(Constantes.BIRTHDAY, birthDate.getTime().getTime());
 
         Calendar dateNow = Calendar.getInstance();

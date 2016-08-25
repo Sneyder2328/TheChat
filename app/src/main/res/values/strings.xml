@@ -3,18 +3,17 @@
 
 
     <string name="activity.chat.title">Search Chat</string>
+    <string name="activity.chat.message.loadchat">Searching chat...</string>
+    <string name="activity.chat.hint.newmessage">Type a message</string>
 
 
     <string name="login.bienvenida">Connect with more people around the world</string>
     <string name="login.signin.failed">Failed login</string>
     <string name="login.button.signin">Sign in with Google</string>
-    <string name="login.message.progress.load">Loading data...</string>
+    <string name="login.message.progress.load">Sign in...</string>
 
 
-
-
-
-    <string name="main.menu.logout">Log out</string>
+    <string name="main.menu.logout">Sign out</string>
 
     <string-array name="mainactivity_title_fragments">
         <item>Find</item>
@@ -40,6 +39,7 @@
     <string name="register.message.selectlanguage">You must select your language</string>
     <string name="register.message.selectgender">Please select your gender</string>
     <string name="register.text.acceptpolicy">By register you accept our <a href="http://www.twismart.com/thechat/privacypolicy">privacy policy</a> and <a href="http://www.twismart.com/thechat/termsofuse/">terms of use</a></string>
+    <string name="register.text.anonymous">Anonymous</string>
     <string name="register.message.profile.dataupdated">Your profile data have been updated correctly</string>
 
     <string-array name="register_options_avatar">

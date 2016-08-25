@@ -8,8 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -24,7 +22,7 @@ public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private GoogleApiClient mGoogleApiClient;
     private static final int RC_SIGN_IN = 1;
-    public static SharedPreferences preferences;
+    private PreferencesProfile preferencesProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +32,9 @@ public class LoginActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        preferences = getSharedPreferences(Constantes.MY_PREFERENCES, MODE_PRIVATE);
-        if(preferences.getBoolean(Constantes.LOGGED, false)){
+        preferencesProfile = new PreferencesProfile(this);
+
+        if(preferencesProfile.getLogged()){
             openMainActivity();
         }
         else{
@@ -113,7 +112,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void saveUserInLocal(UserDO user){
-        SharedPreferences.Editor editor = preferences.edit();
+        SharedPreferences.Editor editor = preferencesProfile.preferences.edit();
         editor.putString(Constantes.ID, user.getUserId());
         editor.putString(Constantes.NAME, user.getName());
         editor.putString(Constantes.EMAIL, user.getEmail());
@@ -132,7 +131,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void openRegister(String signInMode, String id, String email, String name, String photoUrl){
-        SharedPreferences.Editor editor = preferences.edit();
+        SharedPreferences.Editor editor = preferencesProfile.preferences.edit();
         editor.clear();
         editor.putString(Constantes.SIGN_IN_MODE, signInMode);//aun no la uso en dynamo// prox la integrare
         editor.putString(Constantes.ID, id);

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,4 +9,39 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.twismart.thechat.ChatActivity">
 
-</RelativeLayout>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/chat_heigth_newmessage"
+        android:paddingBottom="4dp"
+        android:background="#fd00dd">
+
+        <LinearLayout
+            android:id="@+id/layoutMessages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"/>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_heigth_newmessage"
+        android:layout_gravity="bottom"
+        android:background="#0000fd">
+
+        <EditText
+            android:id="@+id/inputNewMessage"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:hint="@string/activity.chat.hint.newmessage"
+            android:layout_weight="5"/>
+
+        <Button
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="send"/>
+
+    </LinearLayout>
+
+</FrameLayout>
