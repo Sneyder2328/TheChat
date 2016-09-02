@@ -1,5 +1,6 @@
 package com.twismart.thechat;
 
+import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +14,13 @@ import android.widget.Toast;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedQueryList;
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.RemoteMessage;
 import com.mysampleapp.demo.nosql.MessageDO;
 import com.mysampleapp.demo.nosql.UserDO;
 
@@ -23,7 +31,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -57,7 +67,9 @@ public class ChatActivity extends AppCompatActivity {
             startChatWithId(chatId);
         }
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     private void showProgressDialog(){
@@ -79,6 +91,7 @@ public class ChatActivity extends AppCompatActivity {
         networkInteractor.findInterlocutor(new NetworkInteractor.IFindInterLocutorListener() {
             @Override
             public void onSucces(UserDO interlocutor) {
+                idInterlocutor = interlocutor.getUserId();
                 startChatWithId(idInterlocutor);
                 if(getSupportActionBar() != null){
                     getSupportActionBar().setTitle(interlocutor.getName());
@@ -122,6 +135,8 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
+    public static final String URL_SEND_MSG = "http://54.162.88.89/sendmsg.php";
+
     public void send(View v){
         String messageToSend = inputNewMessage.getText().toString().trim();
         if(idInterlocutor != null && !messageToSend.isEmpty()){
@@ -129,38 +144,29 @@ public class ChatActivity extends AppCompatActivity {
                 @Override
                 public void onSendSucces() {
                     Log.d(TAG, "onSendSucces");
-                    new Thread(new Runnable() {
+
+                    final Map<String, String> params = new HashMap<>();
+                    params.put("senderId", "id");
+                    params.put("title", "Titulo");
+                    params.put("from", "de");
+
+                    StringRequest jsonObjectRequest = new StringRequest(Request.Method.POST, URL_SEND_MSG, new Response.Listener<String>() {
                         @Override
-                        public void run() {
-                            try {
-                                HttpURLConnection httpcon = (HttpURLConnection) ((new URL("https://fcm.googleapis.com/fcm/send").openConnection()));
-                                httpcon.setDoOutput(true);
-                                httpcon.setRequestProperty("Content-Type", "application/json");
-                                httpcon.setRequestProperty("Authorization: key", "AIza...iD9wk");
-                                httpcon.setRequestMethod("POST");
-                                httpcon.connect();
-                                System.out.println("Connected!");
-
-                                byte[] outputBytes = "{\"notification\":{\"title\": \"My title\", \"text\": \"My text\", \"sound\": \"default\"}, \"to\": \"cAhmJfN...bNau9z\"}".getBytes("UTF-8");
-                                OutputStream os = httpcon.getOutputStream();
-                                os.write(outputBytes);
-                                os.close();
-
-                                // Reading response
-                        /*
-                        InputStream input = httpcon.getInputStream();
-                        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
-                            for (String line; (line = reader.readLine()) != null;) {
-                                System.out.println(line);
-                            }
-                        }*/
-
-                                Log.d(TAG, "Http POST request sent!");
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                        public void onResponse(String response) {
+                            Log.d(TAG, "onResponse post " + response);
                         }
-                    }).start();
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d(TAG, "Error: post " + error.getClass());
+                        }
+                    }){
+                        @Override
+                        protected Map<String, String> getParams() throws AuthFailureError {
+                            return params;
+                        }
+                    };
+                    com.mysampleapp.Application.getInstance().addToRequestQueue(jsonObjectRequest);
                 }
                 @Override
                 public void onSendFailure(String error) {
