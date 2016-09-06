@@ -47,6 +47,7 @@
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name"
+            android:screenOrientation="sensorPortrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -66,10 +67,10 @@
 
         <activity
             android:name=".ChatActivity"
-            android:label="@string/activity.chat.title"
-            android:windowSoftInputMode="adjustPan"/>
+            android:screenOrientation="sensorPortrait"
+            android:label="@string/activity.chat.title"/>
 
-        <service android:name=".NotificationService">
+        <service android:name=".ChatActivity$NotificationService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>

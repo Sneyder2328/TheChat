@@ -1,5 +1,6 @@
 package com.twismart.thechat;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,6 +18,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.google.firebase.iid.FirebaseInstanceId;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
         preferencesProfile.setLogged(true);
 
         networkInteractor = new NetworkInteractor(this);
+        networkInteractor.writeStatus(Constantes.Status.ONLINE.name());
+        networkInteractor.writeTokenIdFirebase(FirebaseInstanceId.getInstance().getToken(), null);
 
         if(hasGPS()){
             gestionarPermiso(android.Manifest.permission.ACCESS_FINE_LOCATION, PERMISSION_GPS);
@@ -134,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onDestroy(){
         super.onDestroy();
+        networkInteractor.writeStatus(Constantes.Status.OFFLINE.name());
         if(locationManager != null){
             desactivarGPS();
         }
@@ -151,12 +157,26 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.menu_logout) {
-            networkInteractor.writeTokenIdFirebase(null, null);
-            preferencesProfile.clear();
-            preferencesFind.clear();
+            final ProgressDialog mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.setMessage(getString(R.string.login_message_progress_load));
+            mProgressDialog.show();
+            networkInteractor.writeStatus(Constantes.Status.OFFLINE.name());
+            networkInteractor.writeTokenIdFirebase(null, new NetworkInteractor.IWriteTokenIdFirebase() {
+                @Override
+                public void onSucces() {
+                    preferencesProfile.clear();
+                    preferencesFind.clear();
+                    mProgressDialog.cancel();
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                    finish();
+                }
 
-            startActivity(new Intent(MainActivity.this, LoginActivity.class));
-            finish();
+                @Override
+                public void onFailure(String error) {
+
+                }
+            });
 
             return true;
         }

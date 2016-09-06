@@ -13,12 +13,24 @@ import java.util.Set;
 
 @DynamoDBTable(tableName = "thechat-mobilehub-1444704093-Message")
 
-public class MessageDO implements Comparable<MessageDO> {
+public class MessageDO {
     private Double _date;
     private String _by;
     private String _content;
     private String _to;
     private String _type;
+
+
+    public MessageDO(){
+
+    }
+    public MessageDO(Double _date, String _by, String _to, String _content, String _type) {
+        this._date = _date;
+        this._by = _by;
+        this._content = _content;
+        this._to = _to;
+        this._type = _type;
+    }
 
     @DynamoDBHashKey(attributeName = "date")
     @DynamoDBAttribute(attributeName = "date")
@@ -62,8 +74,9 @@ public class MessageDO implements Comparable<MessageDO> {
         this._type = _type;
     }
 
+
     @Override
-    public int compareTo(MessageDO messageDO) {
-        return (int)(double)this._date - (int)(double)messageDO._date;
+    public String toString() {
+        return "date " + getDate() + " by " + getBy() + " to " + getTo() + " content " + getContent() + " type " + getType();
     }
 }

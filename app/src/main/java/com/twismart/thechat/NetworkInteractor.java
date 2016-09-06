@@ -21,8 +21,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Created by sneyd on 8/17/2016.
@@ -45,47 +47,6 @@ public class NetworkInteractor {
         mapper = AWSMobileClient.defaultMobileClient().getDynamoDBMapper();
         preferencesProfile = new PreferencesProfile(context);
         preferencesFind = new PreferencesFind(context);
-    }
-
-    public void existUserById(final String id, final IExistUserListener listener){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final UserDO userDO = mapper.load(UserDO.class, id);
-                    if(userDO != null){
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                listener.onYesExist(userDO);
-                            }
-                        });
-                    }
-                    else{
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                listener.onNotExist();
-                            }
-                        });
-                    }
-                }
-                catch (Exception e){
-                    Log.d(TAG, "catch in existUserById " + e.getMessage());
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onNotExist();
-                        }
-                    });
-                }
-            }
-        }).start();
-    }
-
-    public interface IExistUserListener {
-        void onYesExist(UserDO user);
-        void onNotExist();
     }
 
     public void writeProfile(final boolean isNewUser, final IWriteProfileListener listener){
@@ -120,9 +81,11 @@ public class NetworkInteractor {
                     String token = FirebaseInstanceId.getInstance().getToken();
                     Log.d(TAG, "token write: " + token);
                     userDO.setTokenId(token);
+
                     final UserDO newUser = userDO;
 
                     mapper.save(newUser);
+
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -259,7 +222,7 @@ public class NetworkInteractor {
                                 Log.d(TAG, "results ");
                                 UserDO user = null;
                                 for (UserDO userDo : results){
-                                    if(!userDo.getUserId().equals(preferencesProfile.getId()) && distanceBetweenUsers(userGetStatus, userDo) <= preferencesFind.getDistanceMax()  && distanceBetweenUsers(userGetStatus, userDo) <= userDo.getDistanceMaxInterlocutor()){
+                                    if(!userDo.getUserId().equals(preferencesProfile.getId()) && Util.distanceBetweenUsers(userGetStatus, userDo) <= preferencesFind.getDistanceMax()  && Util.distanceBetweenUsers(userGetStatus, userDo) <= userDo.getDistanceMaxInterlocutor()){
                                         user = userDo;
                                     }
                                 }
@@ -340,24 +303,6 @@ public class NetworkInteractor {
         chatFound = true;
     }
 
-    public int distanceBetweenUsers(UserDO userDO1, UserDO userDO2){
-        try {
-            Location selected_location = new Location("locationA");
-            selected_location.setLatitude(userDO1.getLatitude());
-            selected_location.setLongitude(userDO1.getLongitude());
-
-            Location near_locations = new Location("locationB");
-            near_locations.setLatitude(userDO2.getLatitude());
-            near_locations.setLongitude(userDO2.getLongitude());
-
-            return (int) selected_location.distanceTo(near_locations) / 1000;//return the result in km
-        }
-        catch(Exception e){
-            Log.e(TAG, "catch in distanceBetweenUsers " + e.getMessage());
-            return 0;
-        }
-    }
-
 
     public void writeLocationInPerfil(final double latitude, final double longitude){
         new Thread(new Runnable() {
@@ -371,6 +316,23 @@ public class NetworkInteractor {
                 }
                 catch (Exception e){
                     Log.d(TAG, "catch in writeLocationInPerfil " + e.getMessage());
+                }
+            }
+        }).start();
+    }
+
+    public void writeStatus(final String status){
+        final String userId = preferencesProfile.getId();//adelantarme al preferences.clear
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final UserDO userDO = mapper.load(UserDO.class, userId);
+                    userDO.setStatus(status);
+                    mapper.save(userDO);
+                }
+                catch (final Exception e){
+                    Log.e(TAG, "catch in writeStatus " + e.getMessage());
                 }
             }
         }).start();
@@ -425,8 +387,8 @@ public class NetworkInteractor {
                 newMessage.setContent(messageToSend);
                 newMessage.setType(Constantes.TypeMessage.TEXT.name());
 
-                Calendar cal = new GregorianCalendar();
-                double date = (double) System.currentTimeMillis() - cal.getTimeZone().getOffset(System.currentTimeMillis());
+                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+                double date = (double)cal.getTimeInMillis();
                 newMessage.setDate(date);
 
                 try{
@@ -456,7 +418,7 @@ public class NetworkInteractor {
     }
 
 
-    public void getMessagesWithUser(final String idInterlocutor, final IGetMessagesWithUser listener){
+    public void getMessagesWithUser(final String idInterlocutor, final double minDate, final IGetMessagesWithUser listener){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -465,8 +427,13 @@ public class NetworkInteractor {
                     myMessagesToFind.setBy(preferencesProfile.getId());
                     myMessagesToFind.setTo(idInterlocutor);
 
+                    final Condition conditionDate = new Condition()
+                            .withComparisonOperator(ComparisonOperator.GT.toString())
+                            .withAttributeValueList(new AttributeValue().withN(String.valueOf(minDate)));
+
                     DynamoDBQueryExpression<MessageDO> myQueryExpression = new DynamoDBQueryExpression<MessageDO>()
                             .withHashKeyValues(myMessagesToFind)
+                            .withQueryFilterEntry("date", conditionDate)
                             .withConsistentRead(false);
 
                     PaginatedQueryList<MessageDO> listMyMessages = mapper.query(MessageDO.class, myQueryExpression);
@@ -478,6 +445,7 @@ public class NetworkInteractor {
 
                     DynamoDBQueryExpression<MessageDO> hisQueryExpression = new DynamoDBQueryExpression<MessageDO>()
                             .withHashKeyValues(hisMessagesToFind)
+                            .withQueryFilterEntry("date", conditionDate)
                             .withConsistentRead(false);
 
                     PaginatedQueryList<MessageDO> listHisMessages = mapper.query(MessageDO.class, hisQueryExpression);
@@ -493,7 +461,12 @@ public class NetworkInteractor {
                     }
 
                     if(!listMessages.isEmpty()){
-                        Collections.sort(listMessages);
+                        Collections.sort(listMessages, new Comparator<MessageDO>() {
+                            @Override
+                            public int compare(MessageDO m1, MessageDO m2) {
+                                return m1.getDate().compareTo(m2.getDate());
+                            }
+                        });
                     }
 
                     activity.runOnUiThread(new Runnable() {
@@ -517,6 +490,74 @@ public class NetworkInteractor {
 
     public interface IGetMessagesWithUser {
         void onSucces(List<MessageDO> listMessages);
+        void onFailure(String error);
+    }
+
+    public void getUserById(final String userId, final IGetUserById listener){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final UserDO userDO = mapper.load(UserDO.class, userId);
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onSucces(userDO);
+                        }
+                    });
+                }
+                catch (final Exception e){
+                    Log.d(TAG, "catch in existUserById " + e.getMessage());
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onFailure(e.getMessage());
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    public interface IGetUserById {
+        void onSucces(UserDO userDO);
+        void onFailure(String error);
+    }
+
+    public void getUsersByIds(final List<String> listIds, final IGetUsersByIds listener){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final List<UserDO> listUsers = new ArrayList<>();
+                    for(String userId : listIds){
+                        UserDO user = mapper.load(UserDO.class, userId);
+                        if(user != null){
+                            listUsers.add(user);
+                        }
+                    }
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onSucces(listUsers);
+                        }
+                    });
+                }
+                catch (final Exception e){
+                    Log.d(TAG, "catch in existUserById " + e.getMessage());
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onFailure(e.getMessage());
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    public interface IGetUsersByIds {
+        void onSucces(List<UserDO> listUsers);
         void onFailure(String error);
     }
 }

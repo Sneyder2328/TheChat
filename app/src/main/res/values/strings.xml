@@ -6,11 +6,14 @@
     <string name="activity.chat.message.loadchat">Searching chat...</string>
     <string name="activity.chat.hint.newmessage">Type a message</string>
 
+    <string name="chats.text.status.online">Online</string>
+    <string name="chats.text.status.offline">Offline</string>
+
 
     <string name="login.bienvenida">Connect with more people around the world</string>
     <string name="login.signin.failed">Failed login</string>
     <string name="login.button.signin">Sign in with Google</string>
-    <string name="login.message.progress.load">Sign in...</string>
+    <string name="login.message.progress.load">Logging in...</string>
 
 
     <string name="main.menu.logout">Sign out</string>

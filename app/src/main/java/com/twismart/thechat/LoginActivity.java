@@ -14,9 +14,10 @@ import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.mysampleapp.demo.nosql.UserDO;
-
+//hackers die motherfuckers
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
@@ -88,18 +89,20 @@ public class LoginActivity extends AppCompatActivity {
                 mProgressDialog.show();
 
                 NetworkInteractor networkInteractor = new NetworkInteractor(this);
-                networkInteractor.existUserById(acct.getId(), new NetworkInteractor.IExistUserListener() {
+                networkInteractor.getUserById(acct.getId(), new NetworkInteractor.IGetUserById() {
                     @Override
-                    public void onYesExist(UserDO user) {
-                        saveUserInLocal(user);
+                    public void onSucces(UserDO userDO) {
+                        saveUserInLocal(userDO);
                         openMainActivity();
                         mProgressDialog.cancel();
                     }
+
                     @Override
-                    public void onNotExist() {
+                    public void onFailure(String error) {
                         openRegister(Constantes.SignInMode.GOOGLE.name(), acct.getId(), acct.getEmail(), acct.getDisplayName(), acct.getPhotoUrl()+"");
                         mProgressDialog.cancel();
                     }
+
                 });
                 Auth.GoogleSignInApi.signOut(mGoogleApiClient);
             }
