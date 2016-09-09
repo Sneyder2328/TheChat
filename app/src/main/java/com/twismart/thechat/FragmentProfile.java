@@ -2,16 +2,19 @@ package com.twismart.thechat;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,13 +25,17 @@ import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.amazonaws.mobile.content.UserFileManager;
 
+
+import com.amazonaws.mobile.util.ImageSelectorUtils;
 import com.bumptech.glide.Glide;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.concurrent.CountDownLatch;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -49,6 +56,9 @@ public class FragmentProfile extends Fragment implements View.OnClickListener {
 
     NetworkInteractor networkInteractor;
     private PreferencesProfile preferencesProfile;
+
+    private final CountDownLatch userFileManagerCreatingLatch = new CountDownLatch(1);
+    private UserFileManager userFileManagerClient;
 
     public FragmentProfile() {
         // Required empty public constructor
@@ -91,6 +101,7 @@ public class FragmentProfile extends Fragment implements View.OnClickListener {
         loadDataFromProfileLocal();
 
         networkInteractor = new NetworkInteractor(getActivity());
+        networkInteractor.createUserFileManager();
 
         return v;
     }
@@ -155,9 +166,13 @@ public class FragmentProfile extends Fragment implements View.OnClickListener {
                     }
                 }
                 else{
-                    Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-                    photoPickerIntent.setType("image/*");
-                    startActivityForResult(photoPickerIntent, PICK_PHOTO);
+                    if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                        return;
+                    }
+                    // We have permission, so show the image selector.
+                    final Intent intent = ImageSelectorUtils.getImageSelectionIntent();
+                    startActivityForResult(intent, PICK_PHOTO);
                 }
             }
         });
@@ -166,24 +181,83 @@ public class FragmentProfile extends Fragment implements View.OnClickListener {
     }
 
     @Override
+    public void onRequestPermissionsResult(final int requestCode, final String permissions[], final int[] grantResults) {
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                final Intent intent = ImageSelectorUtils.getImageSelectionIntent();
+                startActivityForResult(intent, PICK_PHOTO);
+            } else {
+                // Inform the user they won't be able to upload without permission.
+                final Activity activity = getActivity();
+                if (activity != null) {
+                    final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+                    dialogBuilder.setTitle(activity.getString(R.string.content_permission_failure_title_text));
+                    dialogBuilder.setMessage(activity.getString(R.string.content_permission_failure_text));
+                    dialogBuilder.setNegativeButton(activity.getString(android.R.string.ok), null);
+                    dialogBuilder.show();
+                }
+            }
+        }
+    }
+
+    private File fileImg = null;
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode) {
-            case PICK_PHOTO:
-                if (resultCode == Activity.RESULT_OK) {
-                    Log.d(TAG, "Picked photo.");
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case PICK_PHOTO:
                     Uri selectedImage = data.getData();
+
                     showNewAvatar(selectedImage);
-                }
-                break;
-            case TAKE_PHOTO:
-                if (resultCode == Activity.RESULT_OK) {
-                    Log.d(TAG, "Take photo.");
+
+                    final String path = ImageSelectorUtils.getFilePathFromUri(getActivity(), selectedImage);
+
+                    fileImg = new File(path);
+                    break;
+                case TAKE_PHOTO:
                     Bundle extras = data.getExtras();
                     Bitmap imageBitmap = (Bitmap) extras.get("data");
-                    showNewAvatar(saveToInternalStorage(imageBitmap));
+                    fileImg = Util.saveToInternalStorage(getContext(), imageBitmap);
+                    showNewAvatar(fileImg.getAbsolutePath());
+            }
+            final ProgressDialog dialog = new ProgressDialog(getActivity());
+            dialog.setTitle(R.string.register_text_progress_dialog_wait);
+            dialog.setMessage(getString(R.string.register_text_progress_dialog_upload_file, fileImg.getName()));
+            dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            dialog.setMax((int) fileImg.length());
+            dialog.setCancelable(false);
+            dialog.show();
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    networkInteractor.uploadFile(fileImg, new NetworkInteractor.IUploadFile() {
+                        @Override
+                        public void onSuccess(final String url) {
+                            dialog.dismiss();
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    networkInteractor.writePhotoUrl(url);
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onProgress(String fileName, boolean isWaiting, long bytesCurrent, long bytesTotal) {
+                            dialog.setProgress((int) bytesCurrent);
+                        }
+
+                        @Override
+                        public void onError(String fileName, Exception ex) {
+                            dialog.dismiss();
+                            Toast.makeText(getContext(), getString(R.string.register_text_error_upload_file, ex.getMessage()), Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
+            }).start();
         }
     }
 
@@ -193,38 +267,11 @@ public class FragmentProfile extends Fragment implements View.OnClickListener {
             SharedPreferences.Editor editor = preferencesProfile.preferences.edit();
             editor.putString(Constantes.PHOTO_URL, img.toString());
             editor.apply();
+            Log.d(TAG, "showNewAvatar: " + img.toString());
         }
         catch (Exception e) {
-            Log.d(TAG, "Error en showNewAvatar: " + e.getMessage());
+            Log.e(TAG, "Error en showNewAvatar: " + e.getMessage());
         }
-    }
-
-    private String saveToInternalStorage(Bitmap bitmapImage){
-        ContextWrapper cw = new ContextWrapper(getContext());
-        // path to /data/data/yourapp/app_data/imageDir
-        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        // Create imageDir
-        File mypath = new File(directory, "TheChat" + (System.currentTimeMillis()/1000) + "Avatar.jpg");
-
-        FileOutputStream fileOutputStream = null;
-        try {
-            fileOutputStream = new FileOutputStream(mypath);
-            // Use the compress method on the BitMap object to write image to the OutputStream
-            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            try {
-                if (fileOutputStream != null) {
-                    fileOutputStream.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return mypath.getAbsolutePath();
     }
 
 

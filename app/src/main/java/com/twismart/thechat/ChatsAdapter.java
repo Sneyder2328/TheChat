@@ -33,6 +33,10 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ChatsViewHol
         this.listener = listener;
     }
 
+    public void setListUsers(List<UserDO> users){
+        this.users = users;
+    }
+
     @Override
     public ChatsAdapter.ChatsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_user, parent, false);
@@ -50,6 +54,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ChatsViewHol
         }
         else {
             status = context.getString(R.string.chats_text_status_online);
+            holder.statusUser.setTextColor(Color.GREEN);
         }
         holder.statusUser.setText(status);
         holder.distanceToUser.setText(String.valueOf(Util.distanceBetweenUsers(myUser, users.get(position))));

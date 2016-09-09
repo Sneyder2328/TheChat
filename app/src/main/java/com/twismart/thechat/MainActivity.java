@@ -18,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -159,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.menu_logout) {
             final ProgressDialog mProgressDialog = new ProgressDialog(this);
             mProgressDialog.setCancelable(false);
-            mProgressDialog.setMessage(getString(R.string.login_message_progress_load));
+            mProgressDialog.setMessage(getString(R.string.main_message_progress_signout));
             mProgressDialog.show();
             networkInteractor.writeStatus(Constantes.Status.OFFLINE.name());
             networkInteractor.writeTokenIdFirebase(null, new NetworkInteractor.IWriteTokenIdFirebase() {
@@ -167,6 +168,8 @@ public class MainActivity extends AppCompatActivity {
                 public void onSucces() {
                     preferencesProfile.clear();
                     preferencesFind.clear();
+                    LocalDataBase dataBase = new LocalDataBase(getApplicationContext());
+                    dataBase.clear();
                     mProgressDialog.cancel();
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
@@ -174,7 +177,8 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(String error) {
-
+                    mProgressDialog.cancel();
+                    Toast.makeText(getBaseContext(), R.string.main_text_not_logout, Toast.LENGTH_LONG).show();
                 }
             });
 

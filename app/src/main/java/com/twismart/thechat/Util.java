@@ -1,9 +1,16 @@
 package com.twismart.thechat;
 
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.util.Log;
 
 import com.mysampleapp.demo.nosql.UserDO;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Created by sneyd on 9/2/2016.
@@ -26,5 +33,33 @@ public class Util {
             Log.e("Util", "catch in distanceBetweenUsers " + e.getMessage());
             return 0;
         }
+    }
+
+    public static File saveToInternalStorage(Context context, Bitmap bitmapImage){
+        ContextWrapper cw = new ContextWrapper(context);
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        // Create imageDir
+        File mypath = new File(directory, "TheChat" + (System.currentTimeMillis()/1000) + "Avatar.jpg");
+
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(mypath);
+            // Use the compress method on the BitMap object to write image to the OutputStream
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                if (fileOutputStream != null) {
+                    fileOutputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return mypath;
     }
 }

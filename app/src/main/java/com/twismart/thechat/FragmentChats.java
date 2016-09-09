@@ -5,11 +5,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.mysampleapp.demo.nosql.UserDO;
 
@@ -22,7 +25,11 @@ public class FragmentChats extends Fragment implements View.OnClickListener {
 
     private OnFragmentInteractionListener mListener;
     private RecyclerView recyclerChats;
-    private ChatsAdapter adapter;
+    private SwipeRefreshLayout refreshLayout;
+    private ChatsAdapter adapter = null;
+
+    private PreferencesProfile preferencesProfile;
+    private NetworkInteractor networkInteractor;
 
     public FragmentChats() {
         // Required empty public constructor
@@ -32,45 +39,81 @@ public class FragmentChats extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_chats, container, false);
 
+        refreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipeRefresh);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateChats();
+            }
+        });
+        refreshLayout.setRefreshing(true);
+
         recyclerChats = (RecyclerView) v.findViewById(R.id.recyclerChats);
         recyclerChats.setHasFixedSize(true);
         recyclerChats.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
 
-        PreferencesProfile preferencesProfile = new PreferencesProfile(getContext());
-        final NetworkInteractor networkInteractor = new NetworkInteractor(getActivity());
+        preferencesProfile = new PreferencesProfile(getContext());
+        networkInteractor = new NetworkInteractor(getActivity());
 
+        return v;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateChats();
+    }
+
+    private void updateChats(){
         networkInteractor.getUserById(preferencesProfile.getId(), new NetworkInteractor.IGetUserById() {
             @Override
             public void onSucces(final UserDO userDO) {
-                List<String> myChatsCurrent = new ArrayList<>(Arrays.asList(userDO.getChatsCurrent().substring(1, userDO.getChatsCurrent().length()-1).split("\\s*,\\s*")));
-                networkInteractor.getUsersByIds(myChatsCurrent, new NetworkInteractor.IGetUsersByIds() {
-                    @Override
-                    public void onSucces(List<UserDO> listUsers) {
-                        adapter = new ChatsAdapter(getContext(), listUsers, userDO, FragmentChats.this);
-                        recyclerChats.setAdapter(adapter);
-                    }
+                try {
+                    List<String> myChatsCurrent = new ArrayList<>(Arrays.asList(userDO.getChatsCurrent().substring(1, userDO.getChatsCurrent().length() - 1).split("\\s*,\\s*")));
+                    networkInteractor.getUsersByIds(myChatsCurrent, new NetworkInteractor.IGetUsersByIds() {
+                        @Override
+                        public void onSucces(List<UserDO> listUsers) {
+                            if (adapter == null) {
+                                adapter = new ChatsAdapter(getContext(), listUsers, userDO, FragmentChats.this);
+                                recyclerChats.setAdapter(adapter);
+                            } else {
+                                adapter.setListUsers(listUsers);
+                                adapter.notifyDataSetChanged();
+                            }
+                            refreshLayout.setRefreshing(false);
+                        }
 
-                    @Override
-                    public void onFailure(String error) {
-
-                    }
-                });
+                        @Override
+                        public void onFailure(String error) {
+                            Toast.makeText(getContext(), R.string.text_error_internet, Toast.LENGTH_SHORT).show();
+                            refreshLayout.setRefreshing(false);
+                        }
+                    });
+                }
+                catch (Exception e){
+                    Log.e("catch updateChats", "error: " + e.getMessage());
+                }
             }
 
             @Override
             public void onFailure(String error) {
-
+                Toast.makeText(getContext(), R.string.text_error_internet, Toast.LENGTH_SHORT).show();
+                refreshLayout.setRefreshing(false);
             }
         });
-        return v;
     }
 
     @Override
     public void onClick(View view) {
         Intent intent = new Intent(getActivity(), ChatActivity.class);
         intent.putExtra(Constantes.ID, adapter.users.get(recyclerChats.getChildAdapterPosition(view)).getUserId());
+        intent.putExtra(Constantes.TOKEN_ID, adapter.users.get(recyclerChats.getChildAdapterPosition(view)).getTokenId());
+        intent.putExtra(Constantes.NAME, adapter.users.get(recyclerChats.getChildAdapterPosition(view)).getName());
         startActivity(intent);
     }
+
+
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {

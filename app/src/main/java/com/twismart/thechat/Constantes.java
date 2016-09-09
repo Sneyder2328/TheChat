@@ -6,7 +6,7 @@ package com.twismart.thechat;
 public class Constantes {
     public static final String PREFERENCES_PROFILE = "jlhgsghd", PREFERENCES_FIND = "jkhgjhgjh", LOGGED = "hgfdsbflddgnl";
 
-    public static final String SIGN_IN_MODE = "signInMode", ID = "id", EMAIL = "email", NAME  = "name", PHOTO_URL = "photoUrl", LANGUAGE = "language",GENDER ="gender", GENDER_FEMALE = "genderFemale", GENDER_MALE = "genderMale";
+    public static final String SIGN_IN_MODE = "signInMode", ID = "id", TOKEN_ID = "tokenId", EMAIL = "email", NAME  = "name", PHOTO_URL = "photoUrl", LANGUAGE = "language",GENDER ="gender", GENDER_FEMALE = "genderFemale", GENDER_MALE = "genderMale";
 
     public static final String DISTANCE_MAX = "distanceMax", MY_LANGUAGE = "myLanguage", AGE_MAX = "ageMax", AGE_MIN ="ageMin";
 

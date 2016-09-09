@@ -1,9 +1,22 @@
 <resources>
+    <string name="download_queue_provider_authority">com.amazonaws.mobile.downloader-com.amazon.mysampleapp</string>
+    <!-- This can be anything, but it should be unique to the app. -->
+    <string name="content_file_provider_authority">com.mysampleapp.fileprovider</string>
+
+    <string name="content_permission_failure_title_text">Permission Failure</string>
+    <string name="content_permission_failure_text">Denial of Read External Storage Permission has disabled the ability to upload user files.</string>
+
+
+    <string name="path_profile">https://s3.amazonaws.com/thechat-userfiles-mobilehub-1444704093/public/</string>
+
+
     <string name="app_name">The Chat</string>
+    <string name="text.error.internet">Network connection error</string>
 
 
     <string name="activity.chat.title">Search Chat</string>
-    <string name="activity.chat.message.loadchat">Searching chat...</string>
+    <string name="activity.chat.message.loadchat">Searching chat &#8230;</string>
+    <string name="activity.chat.text.has.message">Has a new message!!!</string>
     <string name="activity.chat.hint.newmessage">Type a message</string>
 
     <string name="chats.text.status.online">Online</string>
@@ -13,11 +26,12 @@
     <string name="login.bienvenida">Connect with more people around the world</string>
     <string name="login.signin.failed">Failed login</string>
     <string name="login.button.signin">Sign in with Google</string>
-    <string name="login.message.progress.load">Logging in...</string>
+    <string name="login.message.progress.load">Logging in &#8230;</string>
 
 
-    <string name="main.menu.logout">Sign out</string>
-
+    <string name="main.menu.logout">Log out</string>
+    <string name="main.message.progress.signout">Closing session &#8230;</string>
+    <string name="main.text.not.logout">Has not closed the session</string>
     <string-array name="mainactivity_title_fragments">
         <item>Find</item>
         <item>Chats</item>
@@ -28,6 +42,9 @@
 
 
 
+    <string name="register.text.progress.dialog.wait">Please wait &#8230;</string>
+    <string name="register.text.progress.dialog.upload.file">Uploading file \'%s\'</string>
+    <string name="register.text.error.upload.file">Failed to upload file due to \'%s\'.</string>
     <string name="register.input.name">Name</string>
     <string name="register.avatar">Avatar</string>
     <string name="register.option.female">Female</string>

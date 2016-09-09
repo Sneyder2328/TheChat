@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <resources>
+    <string name="app_name">The Chat</string>
+    <string name="activity.chat.hint.newmessage">Escribe un mensaje</string>
+    <string name="activity.chat.message.loadchat">Buscando chat...</string>
+    <string name="activity.chat.text.has.message">Tienes un nuevo mensaje!!!</string>
+    <string name="activity.chat.title">Buscar chat</string>
+    <string name="chats.text.status.offline">Desconectado</string>
+    <string name="chats.text.status.online">Conectado</string>
+    <string name="find.button.startchat">Comenzar chat</string>
+    <string name="find.check.searchinmylanguage">Buscar solo en mi idioma</string>
+    <string name="find.text.ageby">Edad mínima:</string>
+    <string name="find.text.ageto">Edad máxima</string>
+    <string-array name="find_options_distance">
+         <item> Distancia: hasta 10 km </item>
+         <item> Distancia: hasta 50 km </item>
+         <item> Distancia: hasta 100 km </item>
+         <item> Distancia: hasta 250 km </item>
+         <item> Distancia: hasta 500 km </item>
+         <item> Distancia: hasta 1000 km </item>
+         <item> Distancia: hasta 2500 km </item>
+         <item> Distancia: no importa </item>
+    </string-array>
+
+    <string-array name="find_options_age">
+        <item>18</item>
+        <item>22</item>
+        <item>24</item>
+        <item>26</item>
+        <item>28</item>
+        <item>30</item>
+        <item>32</item>
+        <item>34</item>
+        <item>36</item>
+        <item>38</item>
+        <item>40</item>
+        <item>42</item>
+        <item>44</item>
+        <item>46</item>
+        <item>48</item>
+        <item>50</item>
+        <item>cualquiera</item>
+    </string-array>
+
+
+    <string name="find.text.interestin">Interesado en:</string>
+    <string name="hello_blank_fragment">Helo</string>
+    <string name="login.bienvenida">Conectate con más personas en todo el mundo</string>
+    <string name="login.button.signin">Inicia sesión con Google</string>
+    <string name="login.message.progress.load">Iniciando sesión...</string>
+    <string name="login.signin.failed">Error de inicio de sesión</string>
+    <string name="main.menu.logout">Cerrar sesión</string>
+    <string name="main.message.progress.signout">Cerrando sesión...</string>
+    <string name="main.text.not.logout">Error al cerrar sesión</string>
+    <string-array name="mainactivity_title_fragments">
+        <item>Buscar</item>
+        <item>Chats</item>
+        <item>Mi perfil</item>
+    </string-array>
+
+    <string name="register.button.cancelchanges">Cancelar</string>
+    <string name="register.avatar">Avatar</string>
+    <string name="register.button.register">Registrarte</string>
+    <string name="register.button.savechanges">Guardar cambios</string>
+    <string name="register.input.birthday">Fecha de nacimiento</string>
+    <string name="register.input.gender">Género:</string>
+    <string name="register.input.language">Idioma:</string>
+    <string name="register.input.name">Nombre</string>
+    <string name="register.message.profile.dataupdated">Sus datos de perfil se han actualizado correctamente</string>
+    <string-array name="register_options_avatar">
+        <item>Tomar foto</item>
+        <item>Elegir foto</item>
+    </string-array>
+
+    <string-array name="register_list_languages">
+        <item>Seleccione su idioma:</item>
+        <item>English</item>
+        <item>Español</item>
+        <item>Deutsch</item>
+        <item>Français</item>
+        <item>Português</item>
+        <item>Italiano</item>
+    </string-array>
+
+
+
+    <string name="register.message.selectgender">Por favor seleccione su género</string>
+    <string name="register.message.selectlanguage">Debe seleccionar su idioma</string>
+    <string name="register.message.under18years">Debe tener al menos 18 años de edad</string>
+    <string name="register.option.female">Mujer</string>
+    <string name="register.option.male">Hombre</string>
+    <string name="register.text.acceptpolicy">Al registrarse acepta nuestra <a href="http://www.twismart.com/thechat/privacypolicy">política de privacidad</a> y <a href="http://www.twismart.com/thechat/termsofuse/">términos de uso </a></string>
+    <string name="register.text.anonymous">Anónimo</string>
+    <string name="text.error.internet">Error de conexión de red</string>
+</resources>

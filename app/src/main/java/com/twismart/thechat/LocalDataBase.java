@@ -50,7 +50,7 @@ public class LocalDataBase extends SQLiteOpenHelper {
 
         SQLiteDatabase database = getReadableDatabase();
 
-        Cursor messagesReceived = database.rawQuery("SELECT  * FROM " + Message.TABLE_NAME + " WHERE " + Message.COLUMN_NAME_TO + " = '" + myId + "'", null);
+        Cursor messagesReceived = database.rawQuery("SELECT  * FROM " + Message.TABLE_NAME + " WHERE " + Message.COLUMN_NAME_TO + " = '" + myId + "' AND " + Message.COLUMN_NAME_BY + " = '" + interlocutorId + "'", null);
         while (messagesReceived.moveToNext()){
             Log.d(TAG, "date "  + messagesReceived.getLong(0) + "  by " + messagesReceived.getString(1) + "  to "  +messagesReceived.getString(2) + "  content " + messagesReceived.getString(3) + "  type " + messagesReceived.getString(4));
             listMessages.add(new MessageDO((double)messagesReceived.getLong(0), messagesReceived.getString(1), messagesReceived.getString(2), messagesReceived.getString(3), messagesReceived.getString(4)));
@@ -79,6 +79,12 @@ public class LocalDataBase extends SQLiteOpenHelper {
         return listMessages;
     }
 
+    public void clear(){
+        SQLiteDatabase database = getWritableDatabase();
+        Log.d(TAG, "delete MessageTable Result: " + database.delete(Message.TABLE_NAME, null, null));
+        database.close();
+    }
+
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
 
@@ -86,4 +92,7 @@ public class LocalDataBase extends SQLiteOpenHelper {
 }
 class Message {
     public static final String TABLE_NAME = "messages", COLUMN_NAME_DATE = "date", COLUMN_NAME_BY = "byUser", COLUMN_NAME_TO = "toUser", COLUMN_NAME_CONTENT = "content", COLUMN_NAME_TYPE = "type";
+}
+class ChatsCurrent {//lo hago despues
+    public static final String TABLE_NAME = "chatssCurrent", COLUMN_NAME_TOKEN = "tokenId", COLUMN_NAME_NAME = "name", COLUMN_NAME_ID = "id", COLUMN_NAME_STATUS = "status", COLUMN_NAME_LAT = "lat", COLUMN_NAME_LONG = "long";
 }

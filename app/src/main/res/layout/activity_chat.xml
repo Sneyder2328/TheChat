@@ -5,10 +5,16 @@
     android:layout_height="match_parent"
     tools:context="com.twismart.thechat.ChatActivity">
 
-    <ScrollView
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="6dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background_hd"/>
+
+    <ScrollView
+        android:id="@+id/scrollMessages"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_marginBottom="@dimen/chat_heigth_newmessage"
         android:paddingBottom="4dp">
 
@@ -16,6 +22,8 @@
             android:id="@+id/layoutMessages"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
             android:orientation="vertical"/>
     </ScrollView>
 
@@ -23,6 +31,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="@dimen/chat_heigth_newmessage"
+        android:focusableInTouchMode="true"
+        android:background="#ffffff"
         android:layout_gravity="bottom">
 
         <EditText
@@ -30,16 +40,18 @@
             android:layout_width="0px"
             android:layout_height="match_parent"
             android:hint="@string/activity.chat.hint.newmessage"
+            android:backgroundTint="@android:color/transparent"
+            android:inputType="textCapWords"
             android:layout_weight="5"/>
 
         <ImageButton
+            android:id="@+id/btnAction"
             android:layout_width="0px"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="bottom"
-
+            android:background="@android:color/transparent"
             android:layout_weight="1"
-            android:src="@drawable/ic_send_black_24dp"
-            android:onClick="send"/>
+            android:src="@drawable/ic_camera_alt_black_24dp" />
 
     </LinearLayout>
 
