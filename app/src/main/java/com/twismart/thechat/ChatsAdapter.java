@@ -8,6 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.amazonaws.mobile.AWSMobileClient;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.util.*;
 import com.mysampleapp.demo.nosql.UserDO;
@@ -25,6 +28,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ChatsViewHol
     List<UserDO> users;
     private Context context;
     private UserDO myUser;
+    private AmazonS3 s3 = new AmazonS3Client(AWSMobileClient.defaultMobileClient().getIdentityManager().getCredentialsProvider());
 
     public ChatsAdapter(Context context, List<UserDO> users, UserDO myUser, View.OnClickListener listener){
         this.context = context;
@@ -59,7 +63,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ChatsViewHol
         holder.statusUser.setText(status);
         holder.distanceToUser.setText(String.valueOf(Util.distanceBetweenUsers(myUser, users.get(position))));
         holder.distanceToUser.append("Km");
-        Glide.with(context).load(users.get(position).getPhotoUrl()).into(holder.imgUser);
+        Glide.with(context).load(Util.generateURL(s3, users.get(position).getPhotoUrl())).into(holder.imgUser).onLoadFailed(null, context.getResources().getDrawable(R.drawable.ic_person_black_24dp));
     }
 
     @Override

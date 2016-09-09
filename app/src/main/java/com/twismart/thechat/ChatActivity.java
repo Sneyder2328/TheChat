@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -33,17 +34,22 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amazonaws.mobile.AWSMobileClient;
 import com.amazonaws.mobile.util.ImageSelectorUtils;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.bumptech.glide.Glide;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -78,12 +84,15 @@ public class ChatActivity extends AppCompatActivity {
     private PreferencesProfile preferencesProfile;
     private LocalDataBase dataBase;
 
+    private AmazonS3 s3 = new AmazonS3Client(AWSMobileClient.defaultMobileClient().getIdentityManager().getCredentialsProvider());
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
         networkInteractor = new NetworkInteractor(this);
+        networkInteractor.createUserFileManager();
 
         layoutMessages = (LinearLayout) findViewById(R.id.layoutMessages);
 
@@ -101,20 +110,9 @@ public class ChatActivity extends AppCompatActivity {
                 }, 200);
             }
         });
-        inputNewMessage.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                btnActionSend = charSequence.length() > 0;
-            }
-            @Override
-            public void afterTextChanged(Editable editable) {
-            }
-        });
 
         btnAction = (ImageButton) findViewById(R.id.btnAction);
+        btnAction.setColorFilter(Color.parseColor("#757575"));
         btnAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -125,6 +123,26 @@ public class ChatActivity extends AppCompatActivity {
                 else {
                     selectImg();
                 }
+            }
+        });
+
+        inputNewMessage.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if(charSequence.length() > 0) {
+                    btnActionSend = true;
+                    btnAction.setImageResource(R.drawable.ic_send_black_24dp);
+                }
+                else  {
+                    btnActionSend = false;
+                    btnAction.setImageResource(R.drawable.ic_camera_alt_black_24dp);
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {
             }
         });
 
@@ -219,8 +237,8 @@ public class ChatActivity extends AppCompatActivity {
                 public void run() {
                     networkInteractor.uploadFile(fileImg, new NetworkInteractor.IUploadFile() {
                         @Override
-                        public void onSuccess(final String url) {
-                            send(url, false);
+                        public void onSuccess(final String filePath) {
+                            send(filePath, false);
                         }
                         @Override
                         public void onProgress(String fileName, boolean isWaiting, long bytesCurrent, long bytesTotal) {
@@ -326,57 +344,6 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    public static class NotificationService extends FirebaseMessagingService {
-
-        public static final String TAG = "NotificationService";
-
-        @Override
-        public void onMessageReceived(RemoteMessage remoteMessage) {
-            Log.d(TAG, "From: ");
-            if (remoteMessage.getData().containsKey("title") && remoteMessage.getData().containsKey("fromName") && remoteMessage.getData().containsKey("fromTokenId") && remoteMessage.getData().containsKey("fromId")) {
-
-                String title = remoteMessage.getData().get("title");
-                String fromName = remoteMessage.getData().get("fromName");
-                String fromTokenId = remoteMessage.getData().get("fromTokenId");
-                String fromId = remoteMessage.getData().get("fromId");
-
-                //if(interlocutor != null && interlocutor.getName().equals(from)){
-                if (instance != null && interlocutor.getName().equals(fromName)) {
-                    Log.d(TAG, "if(interlocutor != null) {");
-
-                    instance.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            instance.getMessages(false);
-                            MediaPlayer mp = MediaPlayer.create(instance, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-                            //  mp.prepare();
-                            mp.start();
-                        }
-                    });
-                } else {
-                    Log.d(TAG, "else {");
-                    Intent intent = new Intent(this, ChatActivity.class);
-                    intent.putExtra(Constantes.ID, fromId);
-                    intent.putExtra(Constantes.TOKEN_ID, fromTokenId);
-                    intent.putExtra(Constantes.NAME, fromName);
-                    PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
-
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                            .setSmallIcon(R.mipmap.ic_launcher)
-                            .setContentTitle(title)
-                            .setContentText(fromName)
-                            .setAutoCancel(true)
-                            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                            .setContentIntent(pendingIntent);
-
-                    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                    notificationManager.notify(0, builder.build());
-                }
-            } else {
-                Log.d(TAG, "No tiene los datos suficientes");
-            }
-        }
-    }
 
     private void addMessage(MessageDO messageDO) {
         LayoutInflater layoutInflater = LayoutInflater.from(this);
@@ -390,8 +357,17 @@ public class ChatActivity extends AppCompatActivity {
         ViewGroup message = (ViewGroup) layoutInflater.inflate(layout, null, false);
 
         TextView contentMessage = (TextView) message.findViewById(R.id.contentMessage);
-        contentMessage.setText(messageDO.getContent().trim());
+        ImageView imgMessage = (ImageView) message.findViewById(R.id.imgMessage);
 
+        if(messageDO.getType().equals(Constantes.TypeMessage.TEXT.name())) {
+            contentMessage.setText(messageDO.getContent());
+            imgMessage.setVisibility(View.GONE);
+        }
+        else if(messageDO.getType().equals(Constantes.TypeMessage.IMAGE.name())) {
+            contentMessage.setVisibility(View.GONE);
+            String url = Util.generateURL(s3, messageDO.getContent());
+            Glide.with(this).load(url).into(imgMessage);
+        }
         TextView date = (TextView) message.findViewById(R.id.date);
         date.setText(getDateFromMilli(messageDO.getDate()));
 
@@ -473,5 +449,58 @@ public class ChatActivity extends AppCompatActivity {
         super.onDestroy();
         instance = null;
         networkInteractor.stopFindInterlocutor();
+    }
+
+
+    public static class NotificationService extends FirebaseMessagingService {
+
+        public static final String TAG = "NotificationService";
+
+        @Override
+        public void onMessageReceived(RemoteMessage remoteMessage) {
+            Log.d(TAG, "From: ");
+            if (remoteMessage.getData().containsKey("title") && remoteMessage.getData().containsKey("fromName") && remoteMessage.getData().containsKey("fromTokenId") && remoteMessage.getData().containsKey("fromId")) {
+
+                String title = remoteMessage.getData().get("title");
+                String fromName = remoteMessage.getData().get("fromName");
+                String fromTokenId = remoteMessage.getData().get("fromTokenId");
+                String fromId = remoteMessage.getData().get("fromId");
+
+                //if(interlocutor != null && interlocutor.getName().equals(from)){
+                if (instance != null && interlocutor.getName().equals(fromName)) {
+                    Log.d(TAG, "if(interlocutor != null) {");
+
+                    instance.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            instance.getMessages(false);
+                            MediaPlayer mp = MediaPlayer.create(instance, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+                            //  mp.prepare();
+                            mp.start();
+                        }
+                    });
+                } else {
+                    Log.d(TAG, "else {");
+                    Intent intent = new Intent(this, ChatActivity.class);
+                    intent.putExtra(Constantes.ID, fromId);
+                    intent.putExtra(Constantes.TOKEN_ID, fromTokenId);
+                    intent.putExtra(Constantes.NAME, fromName);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+
+                    NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setContentTitle(title)
+                            .setContentText(fromName)
+                            .setAutoCancel(true)
+                            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                            .setContentIntent(pendingIntent);
+
+                    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    notificationManager.notify(0, builder.build());
+                }
+            } else {
+                Log.d(TAG, "No tiene los datos suficientes");
+            }
+        }
     }
 }

@@ -610,17 +610,16 @@ public class NetworkInteractor {
 
     public void uploadFile(File file, final IUploadFile listener) {
         Log.d(TAG, "uploadFile = " + file.getPath());
-
+        if(userFileManagerClient == null){
+            Log.e(TAG, "userFileManagerClient = null");
+        }
         try {
             userFileManagerClient.uploadContent(file, file.getName(), new ContentProgressListener() {
 
                 @Override
                 public void onSuccess(final ContentItem contentItem) {
                     Log.d(TAG, "uploadContent onSuccess ");
-
-                    final AmazonS3 s3 = new AmazonS3Client(AWSMobileClient.defaultMobileClient().getIdentityManager().getCredentialsProvider());
-                    final URL presignedUrl = s3.generatePresignedUrl(AWSConfiguration.AMAZON_S3_USER_FILES_BUCKET, "public/" + contentItem.getFilePath(), new Date(new Date().getTime() * 2));
-                    listener.onSuccess(presignedUrl.toString());
+                    listener.onSuccess(contentItem.getFilePath());
                 }
 
                 @Override

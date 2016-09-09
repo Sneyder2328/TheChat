@@ -6,11 +6,15 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.util.Log;
 
+import com.amazonaws.mobile.AWSConfiguration;
+import com.amazonaws.services.s3.AmazonS3;
 import com.mysampleapp.demo.nosql.UserDO;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.util.Date;
 
 /**
  * Created by sneyd on 9/2/2016.
@@ -61,5 +65,9 @@ public class Util {
             }
         }
         return mypath;
+    }
+
+    public static String generateURL(AmazonS3 amazonS3, String filePath){
+        return amazonS3.generatePresignedUrl(AWSConfiguration.AMAZON_S3_USER_FILES_BUCKET, "public/" + filePath, new Date(new Date().getTime() + 24 * 60 * 60 * 1000)).toString();
     }
 }

@@ -32,8 +32,6 @@ import com.amazonaws.mobile.util.ImageSelectorUtils;
 import com.bumptech.glide.Glide;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.concurrent.CountDownLatch;
 

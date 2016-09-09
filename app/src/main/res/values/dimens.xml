@@ -9,4 +9,6 @@
 
     <dimen name="item_chat_text_name_user_size">18sp</dimen>
     <dimen name="item_chat_text_distance_size">14sp</dimen>
+
+    <dimen name="img_message_max_heigth">400dp</dimen>
 </resources>
