@@ -18,14 +18,21 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
+import com.amazon.device.ads.Ad;
+import com.amazon.device.ads.AdError;
+import com.amazon.device.ads.AdListener;
+import com.amazon.device.ads.AdProperties;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.iid.FirebaseInstanceId;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdListener {
 
-    private static final String TAG = "MainAcivity";
-    private static final int PERMISSION_GPS=2;
+    private static final String TAG = "MainActivity";
+    private static final int PERMISSION_GPS = 2;
 
     private PreferencesProfile preferencesProfile;
     private PreferencesFind preferencesFind;
@@ -35,10 +42,18 @@ public class MainActivity extends AppCompatActivity {
 
     private NetworkInteractor networkInteractor;
 
+    private com.amazon.device.ads.AdLayout amazonAdView;
+    private AdView mAdView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        com.amazon.device.ads.AdRegistration.setAppKey(Constantes.ADS_AMAZON);
+        MobileAds.initialize(getApplicationContext(), Constantes.ID_ADMOB);
+
+        showBanners();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -60,8 +75,53 @@ public class MainActivity extends AppCompatActivity {
         networkInteractor.writeTokenIdFirebase(FirebaseInstanceId.getInstance().getToken(), null);
 
         if(hasGPS()){
-            gestionarPermiso(android.Manifest.permission.ACCESS_FINE_LOCATION, PERMISSION_GPS);
+            managePermission(android.Manifest.permission.ACCESS_FINE_LOCATION, PERMISSION_GPS);
         }
+    }
+
+    private void showBanners() {
+        try {
+            amazonAdView = (com.amazon.device.ads.AdLayout) findViewById(R.id.amazonAd);
+            amazonAdView.setListener(this);
+            amazonAdView.loadAd();
+
+            mAdView = (AdView) findViewById(R.id.admobAd);
+        }
+        catch (Exception e) {
+            Log.d("Error ", "en registrarAdsAmazon");
+        }
+    }
+
+    //listener od ads amazon
+    @Override
+    public void onAdLoaded(Ad ad, AdProperties adProperties) {
+        Log.d(TAG, "onAdLoadddddd");
+    }
+
+    @Override
+    public void onAdFailedToLoad(Ad ad, AdError adError) {
+        Log.e(TAG, "onAdFailedToloaddd " + adError.getMessage());
+        amazonAdView.destroy();
+        amazonAdView.setVisibility(View.GONE);
+
+        mAdView.setVisibility(View.VISIBLE);
+        mAdView.loadAd(Constantes.getAdRequest());
+        mAdView.setAdListener(new com.google.android.gms.ads.AdListener() {
+            @Override
+            public void onAdFailedToLoad(int errorCode) {
+                Log.d(TAG, "adgoogle error " + errorCode);
+                mAdView.setVisibility(View.GONE);
+            }
+        });
+    }
+    @Override
+    public void onAdExpanded(Ad ad) {
+    }
+    @Override
+    public void onAdCollapsed(Ad ad) {
+    }
+    @Override
+    public void onAdDismissed(Ad ad) {
     }
 
 
@@ -69,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         return (getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION));
     }
 
-    public void gestionarPermiso(String manifestPermission, int PERMISSION_REQUEST){
+    public void managePermission(String manifestPermission, int PERMISSION_REQUEST){
         if (ContextCompat.checkSelfPermission(this, manifestPermission) != PackageManager.PERMISSION_GRANTED) {
             // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, manifestPermission)){
@@ -144,6 +204,11 @@ public class MainActivity extends AppCompatActivity {
         if(locationManager != null){
             desactivarGPS();
         }
+        try {
+            amazonAdView.destroy();
+        } catch (Exception e) {
+            Log.e(TAG, "Error en amazon.onDestroy");
+        }
     }
 
 
@@ -178,10 +243,14 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(String error) {
                     mProgressDialog.cancel();
-                    Toast.makeText(getBaseContext(), R.string.main_text_not_logout, Toast.LENGTH_LONG).show();
+                    try {
+                        Toast.makeText(getBaseContext(), R.string.main_text_not_logout, Toast.LENGTH_LONG).show();
+                    }
+                    catch (Exception e){
+                        Log.e(TAG, "catch onFailure writeTokenIdFirebase " + e.getMessage());
+                    }
                 }
             });
-
             return true;
         }
 

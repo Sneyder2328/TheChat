@@ -3,6 +3,7 @@ package com.twismart.thechat;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,9 +12,8 @@ import android.widget.TextView;
 import com.amazonaws.mobile.AWSMobileClient;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.util.*;
 import com.mysampleapp.demo.nosql.UserDO;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -63,7 +63,12 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ChatsViewHol
         holder.statusUser.setText(status);
         holder.distanceToUser.setText(String.valueOf(Util.distanceBetweenUsers(myUser, users.get(position))));
         holder.distanceToUser.append("Km");
-        Glide.with(context).load(Util.generateURL(s3, users.get(position).getPhotoUrl())).into(holder.imgUser).onLoadFailed(null, context.getResources().getDrawable(R.drawable.ic_person_black_24dp));
+        String url = users.get(position).getPhotoUrl();
+        if(!url.contains("http")) {
+            url = Util.generateURL(s3, url);
+        }
+        Log.e("URL", url);
+        Picasso.with(context).load(url).into(holder.imgUser);
     }
 
     @Override

@@ -27,7 +27,7 @@ public class LocalDataBase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL("CREATE TABLE " + Message.TABLE_NAME + "(" + Message.COLUMN_NAME_DATE + " INTEGER, " + Message.COLUMN_NAME_BY + " TEXT, " + Message.COLUMN_NAME_TO + " TEXT, " + Message.COLUMN_NAME_CONTENT + " TEXT, " + Message.COLUMN_NAME_TYPE + " TEXT)");
+        sqLiteDatabase.execSQL("CREATE TABLE " + Message.TABLE_NAME + "(" + Message.COLUMN_NAME_DATE + " INTEGER, " + Message.COLUMN_NAME_BY + " TEXT, " + Message.COLUMN_NAME_TO + " TEXT, " + Message.COLUMN_NAME_CONTENT + " TEXT, " + Message.COLUMN_NAME_TYPE + " TEXT, " + Message.COLUMN_NAME_SEND_CHECK + " TEXT)");
     }
 
     public void addMessages(List<MessageDO> listMessages){
@@ -39,10 +39,20 @@ public class LocalDataBase extends SQLiteOpenHelper {
             contentValues.put(Message.COLUMN_NAME_TO, messageDO.getTo());
             contentValues.put(Message.COLUMN_NAME_CONTENT, messageDO.getContent());
             contentValues.put(Message.COLUMN_NAME_TYPE, messageDO.getType());
+            contentValues.put(Message.COLUMN_NAME_SEND_CHECK, String.valueOf(messageDO.is_sendCheck()));
             database.insert(Message.TABLE_NAME, null, contentValues);
         }
         database.close();
         Log.d(TAG, "added to SQLite " + listMessages.toString());
+    }
+
+    public void updateMessage(MessageDO messageDO){
+        SQLiteDatabase database = getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Message.COLUMN_NAME_CONTENT, messageDO.getContent());
+        contentValues.put(Message.COLUMN_NAME_SEND_CHECK, String.valueOf(messageDO.is_sendCheck()));
+        database.update(Message.TABLE_NAME, contentValues, Message.COLUMN_NAME_DATE + "=" + messageDO.getDate(), null);
+        database.close();
     }
 
     public List<MessageDO> getMessagesWithUser(String myId, String interlocutorId){
@@ -61,7 +71,7 @@ public class LocalDataBase extends SQLiteOpenHelper {
         Cursor messagesSent = database.rawQuery("SELECT  * FROM " + Message.TABLE_NAME + " WHERE " + Message.COLUMN_NAME_TO + " = '" + interlocutorId + "'", null);
         while (messagesSent.moveToNext()){
             Log.d(TAG, "date "  + messagesSent.getLong(0) + "  by " +messagesSent.getString(1) + "  to "  +messagesSent.getString(2) + "  content " + messagesSent.getString(3) + "  type " + messagesSent.getString(4));
-            listMessages.add(new MessageDO((double)messagesSent.getLong(0), messagesSent.getString(1), messagesSent.getString(2), messagesSent.getString(3), messagesSent.getString(4)));
+            listMessages.add(new MessageDO((double)messagesSent.getLong(0), messagesSent.getString(1), messagesSent.getString(2), messagesSent.getString(3), messagesSent.getString(4), Boolean.parseBoolean(messagesSent.getString(5))));
         }
         Log.d(TAG, "sent " + messagesSent.getCount());
         messagesSent.close();
@@ -91,7 +101,7 @@ public class LocalDataBase extends SQLiteOpenHelper {
     }
 }
 class Message {
-    public static final String TABLE_NAME = "messages", COLUMN_NAME_DATE = "date", COLUMN_NAME_BY = "byUser", COLUMN_NAME_TO = "toUser", COLUMN_NAME_CONTENT = "content", COLUMN_NAME_TYPE = "type";
+    public static final String TABLE_NAME = "messages", COLUMN_NAME_DATE = "date", COLUMN_NAME_BY = "byUser", COLUMN_NAME_TO = "toUser", COLUMN_NAME_CONTENT = "content", COLUMN_NAME_TYPE = "type", COLUMN_NAME_SEND_CHECK = "sendCheck";
 }
 class ChatsCurrent {//lo hago despues
     public static final String TABLE_NAME = "chatssCurrent", COLUMN_NAME_TOKEN = "tokenId", COLUMN_NAME_NAME = "name", COLUMN_NAME_ID = "id", COLUMN_NAME_STATUS = "status", COLUMN_NAME_LAT = "lat", COLUMN_NAME_LONG = "long";

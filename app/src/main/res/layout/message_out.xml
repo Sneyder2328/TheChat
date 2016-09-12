@@ -31,6 +31,26 @@
             android:layout_marginLeft="8dp"
             android:adjustViewBounds="true"/>
 
+        <ProgressBar
+            android:id="@+id/progressImgUpload"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:max="100"
+            android:layout_marginRight="12dp"
+            android:layout_marginLeft="8dp"
+            style="?android:attr/progressBarStyleHorizontal" />
+
+
+
+        <ProgressBar
+            android:id="@+id/progressImgLoad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginRight="12dp"
+            android:layout_marginLeft="8dp" />
+
         <TextView
             android:id="@+id/date"
             android:layout_width="wrap_content"

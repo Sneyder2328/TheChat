@@ -99,7 +99,6 @@ public class FragmentProfile extends Fragment implements View.OnClickListener {
         loadDataFromProfileLocal();
 
         networkInteractor = new NetworkInteractor(getActivity());
-        networkInteractor.createUserFileManager();
 
         return v;
     }
@@ -220,51 +219,12 @@ public class FragmentProfile extends Fragment implements View.OnClickListener {
                     fileImg = Util.saveToInternalStorage(getContext(), imageBitmap);
                     showNewAvatar(fileImg.getAbsolutePath());
             }
-            final ProgressDialog dialog = new ProgressDialog(getActivity());
-            dialog.setTitle(R.string.register_text_progress_dialog_wait);
-            dialog.setMessage(getString(R.string.register_text_progress_dialog_upload_file, fileImg.getName()));
-            dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            dialog.setMax((int) fileImg.length());
-            dialog.setCancelable(false);
-            dialog.show();
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    networkInteractor.uploadFile(fileImg, new NetworkInteractor.IUploadFile() {
-                        @Override
-                        public void onSuccess(final String url) {
-                            dialog.dismiss();
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    networkInteractor.writePhotoUrl(url);
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onProgress(String fileName, boolean isWaiting, long bytesCurrent, long bytesTotal) {
-                            dialog.setProgress((int) bytesCurrent);
-                        }
-
-                        @Override
-                        public void onError(String fileName, Exception ex) {
-                            dialog.dismiss();
-                            Toast.makeText(getContext(), getString(R.string.register_text_error_upload_file, ex.getMessage()), Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
-            }).start();
         }
     }
 
     private void showNewAvatar(Object img){
         try{
             Glide.with(this).load(img.toString()).into(imgAvatar);
-            SharedPreferences.Editor editor = preferencesProfile.preferences.edit();
-            editor.putString(Constantes.PHOTO_URL, img.toString());
-            editor.apply();
             Log.d(TAG, "showNewAvatar: " + img.toString());
         }
         catch (Exception e) {
@@ -278,20 +238,79 @@ public class FragmentProfile extends Fragment implements View.OnClickListener {
             if (preferencesProfile.preferences.getBoolean(Constantes.IS_ADULT, false)) {//if is over 18 age years
                 if(spinnerLanguages.getSelectedItemPosition() != 0){//if lenguage is selected
                     saveProfileInLocal();
+                    Log.d(TAG, "writeProfile register");
                     networkInteractor.writeProfile(getActivity() instanceof Register, new NetworkInteractor.IWriteProfileListener() {
                         @Override
                         public void onSucces() {
                             if(getActivity() instanceof MainActivity){
-                                Toast.makeText(getContext(), R.string.register_message_profile_dataupdated, Toast.LENGTH_LONG).show();
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if(fileImg != null){
+                                            networkInteractor.uploadFile(fileImg, new NetworkInteractor.IUploadFile() {
+                                                @Override
+                                                public void onSuccess(final String url) {
+                                                    Log.d(TAG, "onSucess img perfil");
+                                                    SharedPreferences.Editor editor = preferencesProfile.preferences.edit();
+                                                    editor.putString(Constantes.PHOTO_URL, fileImg.getAbsolutePath());
+                                                    editor.apply();
+                                                    networkInteractor.writePhotoUrl(url);
+                                                }
+
+                                                @Override
+                                                public void onProgress(String fileName, boolean isWaiting, long bytesCurrent, long bytesTotal) {
+                                                    Log.d(TAG, bytesCurrent + " <-bytesCurrent bytesTotal-> " + bytesTotal );
+                                                }
+
+                                                @Override
+                                                public void onError(String fileName, Exception ex) {
+                                                    Log.d(TAG, "onError al subir img de perfil");
+                                                }
+                                            });
+                                        }
+                                    }
+                                }).start();
+                                try {
+                                    Toast.makeText(getContext(), R.string.register_message_profile_dataupdated, Toast.LENGTH_LONG).show();
+                                } catch (Exception e){
+
+                                }
                             }
                             else{
+                                if(fileImg != null){
+                                    networkInteractor.uploadFile(fileImg, new NetworkInteractor.IUploadFile() {
+                                        @Override
+                                        public void onSuccess(final String url) {
+                                            Log.d(TAG, "onSucess img perfil");
+                                            SharedPreferences.Editor editor = preferencesProfile.preferences.edit();
+                                            editor.putString(Constantes.PHOTO_URL, fileImg.getAbsolutePath());
+                                            editor.apply();
+                                            networkInteractor.writePhotoUrl(url);
+                                        }
+
+                                        @Override
+                                        public void onProgress(String fileName, boolean isWaiting, long bytesCurrent, long bytesTotal) {
+                                            Log.d(TAG, bytesCurrent + " <-bytesCurrent bytesTotal-> " + bytesTotal );
+                                        }
+
+                                        @Override
+                                        public void onError(String fileName, Exception ex) {
+                                            Log.d(TAG, "onError al subir img de perfil");
+                                        }
+                                    });
+                                }
                                 startActivity(new Intent(getActivity(), MainActivity.class));
                                 getActivity().finish();
                             }
                         }
                         @Override
                         public void onFailure(String error) {
-                            Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+                            try {
+                                Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+                            }
+                            catch(Exception e) {
+
+                            }
                         }
                     });
                 }

@@ -15,13 +15,13 @@
             android:layout_height="wrap_content"
             android:text="@string/find.text.interestin"
             android:textColor="#000"
-            android:textSize="20sp" />
+            android:textSize="18sp" />
 
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/register.option.female"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:id="@+id/checkFemale" />
 
         <CheckBox
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:text="@string/register.option.male"
             android:layout_marginLeft="20dp"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:id="@+id/checkMale" />
 
     </LinearLayout>
@@ -58,9 +58,17 @@
 
         <Spinner
             android:id="@+id/spinnerAgeMin"
-            android:layout_width="100dp"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:layout_marginRight="6dp"/>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
 
         <TextView
             android:layout_width="wrap_content"
@@ -72,7 +80,7 @@
 
         <Spinner
             android:id="@+id/spinnerAgeMax"
-            android:layout_width="100dp"
+            android:layout_width="120dp"
             android:layout_height="wrap_content" />
 
     </LinearLayout>
@@ -84,7 +92,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="20dp"
         android:checked="true"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:id="@+id/checkInMyLanguage" />
 
     <Button

@@ -19,6 +19,7 @@ public class MessageDO {
     private String _content;
     private String _to;
     private String _type;
+    private boolean _sendCheck = true;
 
 
     public MessageDO(){
@@ -30,6 +31,14 @@ public class MessageDO {
         this._content = _content;
         this._to = _to;
         this._type = _type;
+    }
+    public MessageDO(Double _date, String _by, String _to, String _content, String _type, boolean _sendCheck) {
+        this._date = _date;
+        this._by = _by;
+        this._content = _content;
+        this._to = _to;
+        this._type = _type;
+        this._sendCheck = _sendCheck;
     }
 
     @DynamoDBHashKey(attributeName = "date")
@@ -74,6 +83,13 @@ public class MessageDO {
         this._type = _type;
     }
 
+    public boolean is_sendCheck() {
+        return _sendCheck;
+    }
+
+    public void set_sendCheck(boolean _sendCheck) {
+        this._sendCheck = _sendCheck;
+    }
 
     @Override
     public String toString() {

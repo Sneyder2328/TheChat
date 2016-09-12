@@ -7,9 +7,6 @@
     <string name="content_permission_failure_text">Denial of Read External Storage Permission has disabled the ability to upload user files.</string>
 
 
-    <string name="path_profile">https://s3.amazonaws.com/thechat-userfiles-mobilehub-1444704093/public/</string>
-
-
     <string name="app_name">The Chat</string>
     <string name="text.error.internet">Network connection error</string>
 
@@ -17,7 +14,15 @@
     <string name="activity.chat.title">Search Chat</string>
     <string name="activity.chat.message.loadchat">Searching chat &#8230;</string>
     <string name="activity.chat.text.has.message">Has a new message!!!</string>
+    <string name="activity.chat.btn.loadmore">Load more messages</string>
     <string name="activity.chat.hint.newmessage">Type a message</string>
+    <string name="activity.chat.menu.background">Background</string>
+
+    <string-array name="activity_chat_options_background">
+        <item>Image</item>
+        <item>Solid color</item>
+        <item>By default</item>
+    </string-array>
 
     <string name="chats.text.status.online">Online</string>
     <string name="chats.text.status.offline">Offline</string>
@@ -58,7 +63,7 @@
     <string name="register.message.under18years">You must be at least 18 years old</string>
     <string name="register.message.selectlanguage">You must select your language</string>
     <string name="register.message.selectgender">Please select your gender</string>
-    <string name="register.text.acceptpolicy">By register you accept our <a href="http://www.twismart.com/thechat/privacypolicy">privacy policy</a> and <a href="http://www.twismart.com/thechat/termsofuse/">terms of use</a></string>
+    <string name="register.text.acceptpolicy">By register you accept our <a href="http://www.twismart.com/thechat/privacypolicy.html">privacy policy</a> and <a href="http://www.twismart.com/thechat/termsofuse.html">terms of use</a></string>
     <string name="register.text.anonymous">Anonymous</string>
     <string name="register.message.profile.dataupdated">Your profile data have been updated correctly</string>
 
@@ -100,6 +105,7 @@
 
     <string-array name="find_options_age">
         <item>18</item>
+        <item>20</item>
         <item>22</item>
         <item>24</item>
         <item>26</item>

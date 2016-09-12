@@ -1,29 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <resources>
+<resources>
     <string name="app_name">The Chat</string>
     <string name="activity.chat.hint.newmessage">Escribe un mensaje</string>
-    <string name="activity.chat.message.loadchat">Buscando chat...</string>
+    <string name="activity.chat.message.loadchat">Buscando chat &#8230;</string>
     <string name="activity.chat.text.has.message">Tienes un nuevo mensaje!!!</string>
     <string name="activity.chat.title">Buscar chat</string>
+    <string name="activity.chat.menu.background">Fondo</string>
+
+    <string-array name="activity_chat_options_background">
+        <item>Imagen</item>
+        <item>Color sólido</item>
+        <item>Por defecto</item>
+    </string-array>
+
     <string name="chats.text.status.offline">Desconectado</string>
     <string name="chats.text.status.online">Conectado</string>
     <string name="find.button.startchat">Comenzar chat</string>
     <string name="find.check.searchinmylanguage">Buscar solo en mi idioma</string>
     <string name="find.text.ageby">Edad mínima:</string>
-    <string name="find.text.ageto">Edad máxima</string>
+    <string name="find.text.ageto">Edad máxima:</string>
     <string-array name="find_options_distance">
-         <item> Distancia: hasta 10 km </item>
-         <item> Distancia: hasta 50 km </item>
-         <item> Distancia: hasta 100 km </item>
-         <item> Distancia: hasta 250 km </item>
-         <item> Distancia: hasta 500 km </item>
-         <item> Distancia: hasta 1000 km </item>
-         <item> Distancia: hasta 2500 km </item>
-         <item> Distancia: no importa </item>
+         <item>Distancia: hasta 10 km</item>
+         <item>Distancia: hasta 50 km</item>
+         <item>Distancia: hasta 100 km</item>
+         <item>Distancia: hasta 250 km</item>
+         <item>Distancia: hasta 500 km</item>
+         <item>Distancia: hasta 1000 km</item>
+         <item>Distancia: hasta 2500 km</item>
+         <item>Distancia: no importa</item>
     </string-array>
 
     <string-array name="find_options_age">
         <item>18</item>
+        <item>20</item>
         <item>22</item>
         <item>24</item>
         <item>26</item>
@@ -47,10 +56,10 @@
     <string name="hello_blank_fragment">Helo</string>
     <string name="login.bienvenida">Conectate con más personas en todo el mundo</string>
     <string name="login.button.signin">Inicia sesión con Google</string>
-    <string name="login.message.progress.load">Iniciando sesión...</string>
+    <string name="login.message.progress.load">Iniciando sesión &#8230;</string>
     <string name="login.signin.failed">Error de inicio de sesión</string>
     <string name="main.menu.logout">Cerrar sesión</string>
-    <string name="main.message.progress.signout">Cerrando sesión...</string>
+    <string name="main.message.progress.signout">Cerrando sesión &#8230;</string>
     <string name="main.text.not.logout">Error al cerrar sesión</string>
     <string-array name="mainactivity_title_fragments">
         <item>Buscar</item>
@@ -89,7 +98,14 @@
     <string name="register.message.under18years">Debe tener al menos 18 años de edad</string>
     <string name="register.option.female">Mujer</string>
     <string name="register.option.male">Hombre</string>
-    <string name="register.text.acceptpolicy">Al registrarse acepta nuestra <a href="http://www.twismart.com/thechat/privacypolicy">política de privacidad</a> y <a href="http://www.twismart.com/thechat/termsofuse/">términos de uso </a></string>
+    <string name="register.text.acceptpolicy">Al registrarse acepta nuestra <a href="http://www.twismart.com/thechat/privacypolicy.html">política de privacidad</a> y <a href="http://www.twismart.com/thechat/termsofuse.html">términos de uso </a></string>
     <string name="register.text.anonymous">Anónimo</string>
     <string name="text.error.internet">Error de conexión de red</string>
+    <string name="activity.chat.btn.loadmore">Cargar más mensajes</string>
+    <string name="content_permission_failure_text">La negación del permiso de lectura de almacenamiento externo ha deshabilitado la posibilidad de subir archivos al servidor</string>
+    <string name="content_permission_failure_title_text">Sin autorización</string>
+
+    <string name="register.text.error.upload.file">No se pudo cargar el archivo debido a \'%s\'.</string>
+    <string name="register.text.progress.dialog.upload.file">Cargando archivo \'%s\'</string>
+    <string name="register.text.progress.dialog.wait">Por favor esperar &#8230;</string>
 </resources>

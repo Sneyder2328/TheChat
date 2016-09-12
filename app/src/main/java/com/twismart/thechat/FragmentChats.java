@@ -19,6 +19,7 @@ import com.mysampleapp.demo.nosql.UserDO;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 
 public class FragmentChats extends Fragment implements View.OnClickListener {
@@ -85,7 +86,12 @@ public class FragmentChats extends Fragment implements View.OnClickListener {
 
                         @Override
                         public void onFailure(String error) {
-                            Toast.makeText(getContext(), R.string.text_error_internet, Toast.LENGTH_SHORT).show();
+                            try {
+                                Toast.makeText(getContext(), R.string.text_error_internet, Toast.LENGTH_SHORT).show();
+                            }
+                            catch (Exception e){
+                                Log.d("text_error_internet", "text_error_internet");
+                            }
                             refreshLayout.setRefreshing(false);
                         }
                     });
@@ -97,8 +103,13 @@ public class FragmentChats extends Fragment implements View.OnClickListener {
 
             @Override
             public void onFailure(String error) {
-                Toast.makeText(getContext(), R.string.text_error_internet, Toast.LENGTH_SHORT).show();
-                refreshLayout.setRefreshing(false);
+                try {
+                    refreshLayout.setRefreshing(false);
+                    Toast.makeText(getContext(), R.string.text_error_internet, Toast.LENGTH_SHORT).show();
+                }
+                catch (Exception e){
+                    Log.d("text_error_internet", "text_error_internet");
+                }
             }
         });
     }

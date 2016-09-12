@@ -2,6 +2,7 @@ package com.twismart.thechat;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.util.Log;
 
@@ -358,13 +359,14 @@ public class NetworkInteractor {
                     mapper.save(userDO);
                     Log.d(TAG, " writePhotoUrl " + photoUrl);
                 } catch (final Exception e) {
-                    Log.e(TAG, "catch in writeStatus " + e.getMessage());
+                    Log.e(TAG, "catch in writePhotoUrl " + e.getMessage());
                 }
             }
         }).start();
     }
 
     public void writeTokenIdFirebase(final String tokenId, final IWriteTokenIdFirebase listener) {
+        Log.d(TAG, "writeTokenIdFirebase " + tokenId);
         final String userId = preferencesProfile.getId();//adelantarme al preferences.clear
         new Thread(new Runnable() {
             @Override
@@ -403,7 +405,7 @@ public class NetworkInteractor {
     }
 
 
-    public void newMessageToId(final String idInterlocutor, final String messageToSend, final String type, final INewMessageToIdListener listener) {
+    public void newMessageToId(final String idInterlocutor, final String messageToSend, final String type, final double date, final INewMessageToIdListener listener) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -412,9 +414,6 @@ public class NetworkInteractor {
                 newMessage.setTo(idInterlocutor);
                 newMessage.setContent(messageToSend);
                 newMessage.setType(type);
-
-                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-                double date = (double) cal.getTimeInMillis();
                 newMessage.setDate(date);
 
                 try {
@@ -598,21 +597,24 @@ public class NetworkInteractor {
 
     private UserFileManager userFileManagerClient;
 
-    public void createUserFileManager() {
-        AWSMobileClient.defaultMobileClient().createUserFileManager(AWSConfiguration.AMAZON_S3_USER_FILES_BUCKET, "public/", AWSConfiguration.AMAZON_S3_USER_FILES_BUCKET_REGION,
-                new UserFileManager.BuilderResultHandler() {
-                    @Override
-                    public void onComplete(final UserFileManager userFileManager) {
-                        userFileManagerClient = userFileManager;
-                    }
-                });
-    }
-
-    public void uploadFile(File file, final IUploadFile listener) {
+    public void uploadFile(final File file, final IUploadFile listener) {
         Log.d(TAG, "uploadFile = " + file.getPath());
         if(userFileManagerClient == null){
-            Log.e(TAG, "userFileManagerClient = null");
+            AWSMobileClient.defaultMobileClient().createUserFileManager(AWSConfiguration.AMAZON_S3_USER_FILES_BUCKET, "public/", AWSConfiguration.AMAZON_S3_USER_FILES_BUCKET_REGION,
+                    new UserFileManager.BuilderResultHandler() {
+                        @Override
+                        public void onComplete(final UserFileManager userFileManager) {
+                            userFileManagerClient = userFileManager;
+                            upload(file, listener);
+                        }
+                    });
         }
+        else {
+            upload(file, listener);
+        }
+    }
+
+    private void upload(File file, final IUploadFile listener) {
         try {
             userFileManagerClient.uploadContent(file, file.getName(), new ContentProgressListener() {
 

@@ -13,7 +13,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="#000"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:hint="@string/register.input.name" />
 
     </android.support.design.widget.TextInputLayout>
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textColor="#000"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:text="@string/register.avatar" />
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -54,7 +54,7 @@
             android:layout_height="wrap_content"
             android:text="@string/register.input.gender"
             android:textColor="#000"
-            android:textSize="20sp" />
+            android:textSize="18sp" />
 
         <RadioGroup
             android:layout_width="wrap_content"
@@ -67,7 +67,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/register.option.female"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:id="@+id/optionFemale" />
 
             <RadioButton
@@ -75,7 +75,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/register.option.male"
                 android:layout_marginLeft="20dp"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:id="@+id/optionMale" />
 
         </RadioGroup>
@@ -90,7 +90,7 @@
         android:text="@string/register.input.birthday"
         android:layout_marginTop="20dp"
         android:textColor="#000"
-        android:textSize="20sp" />
+        android:textSize="18sp" />
 
     <View
         android:layout_width="match_parent"
@@ -108,7 +108,7 @@
             android:layout_height="wrap_content"
             android:text="@string/register.input.language"
             android:textColor="#000"
-            android:textSize="20sp" />
+            android:textSize="18sp" />
 
         <Spinner
             android:id="@+id/spinnerLanguages"
